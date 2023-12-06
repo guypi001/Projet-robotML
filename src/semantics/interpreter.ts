@@ -1,13 +1,13 @@
-import { BinExpr, BooleanLiteral, NumberLiteral, isAssignment, isBinExpr, isBooleanLiteral, isDeplacement, isExpression, isFunctionCallStatement, isGetDistance, isGetTime, isIfStatement, isInternalFunctionCall, isInternalFunctionCallStatement, isNumberLiteral, isVariableDeclaration, isVariableReference, isWhileLoop } from '../language/generated/ast.js';
-import { AssignmentImpl, BasicTypeImpl, BinExprImpl, BooleanLiteralImpl, DeplacementImpl, ExpressionImpl, ForLoopImpl, FunctImpl, FunctionCallStatementImpl, FunctionParameterImpl, GetDistanceImpl, GetTimeImpl, IfStatementImpl, Modelimpl, NumberLiteralImpl, RoboMLVisitor, RotationImpl, SettingImpl, UserDefinedTypeImpl, VariableDeclarationImpl, VariableReferenceImpl, WhileLoopImpl } from '../language/visitor.js';
+import { Assignment, BasicType, BinExpr, BooleanLiteral, Deplacement, ForLoop, Funct, FunctionCallStatement, FunctionParameter, GetDistance, GetTime, IfStatement, Model, NumberLiteral, Rotation, Setting, UserDefinedType, VariableDeclaration, VariableReference, WhileLoop, isAssignment, isBinExpr, isBooleanLiteral, isDeplacement, isExpression, isFunctionCallStatement, isGetDistance, isGetTime, isIfStatement, isInternalFunctionCall, isInternalFunctionCallStatement, isNumberLiteral, isVariableDeclaration, isVariableReference, isWhileLoop } from '../language/generated/ast.js';
+import {  ExpressionImpl, RoboMLVisitor } from '../language/visitor.js';
 import { Expression } from '../language/generated/ast.js';
 
 export class MyRoboMLVisitor implements RoboMLVisitor {
-    visitFunctImpl(node: FunctImpl) {
+visitFunctImpl(node: Funct) {
         // Visit function parameters
         for (const param of node.parameters) {
             //param.accept(this);
-            this.visitVariableDeclarationImpl(param as VariableDeclarationImpl);
+            this.visitVariableDeclarationImpl(param);
         }
 
         // Visit function statements
@@ -15,51 +15,33 @@ export class MyRoboMLVisitor implements RoboMLVisitor {
         for (const stmt of node.body) {
 
             if (isAssignment(stmt)) {
-                const assignment = new AssignmentImpl(node, stmt.variable, stmt.expression as Expression);
-                //assignment.accept(this);
-                this.visitAssignmentImpl(assignment);
+                this.visitAssignmentImpl(stmt);
             }
             if (isFunctionCallStatement(stmt)) {
-                const functionCallStatement = new FunctionCallStatementImpl(node, stmt.function, stmt.parameters.map(param => new FunctionParameterImpl(stmt, param.$type, param.expression as ExpressionImpl)));
-                //functionCallStatement.accept(this);
-                this.visitFunctionCallStatementImpl(functionCallStatement);
+                this.visitFunctionCallStatementImpl(stmt);
             }
             if (isVariableDeclaration(stmt)) {
-                const variableDeclaration = new VariableDeclarationImpl(node, stmt.name, stmt.type, stmt.initialValue as ExpressionImpl);
-                //variableDeclaration.accept(this);
-                this.visitVariableDeclarationImpl(variableDeclaration);
+                this.visitVariableDeclarationImpl(stmt);
             }
             if(isIfStatement(stmt)) {
-                const ifStatement = new IfStatementImpl(stmt, stmt.condition, stmt.ifbody, stmt.elsebody);
-                //ifStatement.accept(this);
-                this.visitIfStatementImpl(ifStatement);
+                this.visitIfStatementImpl(stmt);
             }
             if(isWhileLoop(stmt)) {
-                const whileLoop = new WhileLoopImpl(stmt, stmt.condition, stmt.body);
-                //whileLoop.accept(this);
-                this.visitWhileLoopImpl(whileLoop);
+                this.visitWhileLoopImpl(stmt);
             }
             if(isInternalFunctionCallStatement(stmt) && isInternalFunctionCall(stmt)) {
                 if (isGetDistance(stmt)) {
-                    const getDistance = new GetDistanceImpl(node);
-                    //getDistance.accept(this);
-                    this.visitGetDistanceImpl(getDistance);
+                    this.visitGetDistanceImpl(stmt);
                 }
                 if (isGetTime(stmt)) {
-                    const getTime = new GetTimeImpl(node);
-                    //getTime.accept(this);
-                    this.visitGetTimeImpl(getTime);
+                    this.visitGetTimeImpl(stmt);
                 }
                 if (isDeplacement(stmt)) {
                     if(stmt.function === 'Forward') {
-                        const deplacement = new DeplacementImpl(node, stmt.distance, 'Forward');
-                        //deplacement.accept(this);
-                        this.visitDeplacementImpl(deplacement);
+                        this.visitDeplacementImpl(stmt);
                     }
                     if(stmt.function === 'Backward') {
-                        const deplacement = new DeplacementImpl(node, stmt.distance, 'Backward');
-                        //deplacement.accept(this);
-                        this.visitDeplacementImpl(deplacement);
+                        this.visitDeplacementImpl(stmt);
                     }
                 }
             }
@@ -73,30 +55,30 @@ export class MyRoboMLVisitor implements RoboMLVisitor {
 
         return null;
     }
-    visitFunctionParameterImpl(node: FunctionParameterImpl) {
+    visitFunctionParameterImpl(node: FunctionParameter) {
         //node.expression.accept(this);
         if (isExpression(node.expression)) {
-            return this.visitExpressionImpl(node.expression as ExpressionImpl);
+            return this.visitExpressionImpl(node.expression);
         }
         if (isVariableDeclaration(node.expression)) {
-            return this.visitVariableDeclarationImpl(node.expression as VariableDeclarationImpl);
+            return this.visitVariableDeclarationImpl(node.expression);
         }
         return null;
     }
-    visitFunctionCallStatementImpl(node: FunctionCallStatementImpl) {
+    visitFunctionCallStatementImpl(node: FunctionCallStatement) {
         // Visit the function parameters
         for (const param of node.parameters) {
             this.visitFunctionParameterImpl(param);
         }
         // Visit the function reference if it exists
         if (node.function.ref) {
-            this.visitFunctImpl(node.function.ref as FunctImpl);
+            this.visitFunctImpl(node.function.ref);
         }
         
 
         return null;
     }
-    visitVariableDeclarationImpl(node: VariableDeclarationImpl) {
+    visitVariableDeclarationImpl(node: VariableDeclaration) {
         let value: any = null;
         if (node.initialValue) {
             if (isExpression(node.initialValue)) {
@@ -109,11 +91,11 @@ export class MyRoboMLVisitor implements RoboMLVisitor {
             }
             if (isInternalFunctionCallStatement(node.initialValue) && isInternalFunctionCall(node.initialValue) && isGetDistance(node.initialValue)) {
                 //node.initialValue.accept(this);
-                value = this.visitGetDistanceImpl(node.initialValue as GetDistanceImpl);
+                value = this.visitGetDistanceImpl(node.initialValue);
             }
             if (isInternalFunctionCallStatement(node.initialValue) && isInternalFunctionCall(node.initialValue) && isGetTime(node.initialValue)) {
                 //node.initialValue.accept(this);
-                value = this.visitGetTimeImpl(node.initialValue as GetTimeImpl);
+                value = this.visitGetTimeImpl(node.initialValue);
             }
 
         }
@@ -121,48 +103,45 @@ export class MyRoboMLVisitor implements RoboMLVisitor {
 
         return value;
     }
-    visitAssignmentImpl(node: AssignmentImpl) {
+    visitAssignmentImpl(node: Assignment) {
         // Retrieve the variable declaration referenced by the `variable` property
-        const variableDeclaration = node.variable.ref as VariableDeclarationImpl;
+        const variableDeclaration = node.variable.ref;
+        if(isVariableDeclaration(variableDeclaration) ){
+            if(isExpression(node.expression)) {
+                // Evaluate the expression value
+                const expressionValue = this.visitExpressionImpl(node.expression);
 
-        // Evaluate the expression value
-        const expressionValue = this.visitExpressionImpl(node.expression as ExpressionImpl);
-
-        // Assign the evaluated expression value to the variable
-        variableDeclaration.initialValue = expressionValue;
-
+                // Assign the evaluated expression value to the variable
+                variableDeclaration.initialValue = expressionValue;
+            }
+        }
         return variableDeclaration;
     }
 
-    visitDeplacementImpl(node: DeplacementImpl) {
+    visitDeplacementImpl(node: Deplacement) {
         throw new Error('Method not implemented.');
     }
-    visitIfStatementImpl(node: IfStatementImpl) {
-        if(this.visitExpressionImpl(node.condition as ExpressionImpl)) {
+    visitIfStatementImpl(node: IfStatement) {
+        if(isExpression(node.condition)){
+        if(this.visitExpressionImpl(node.condition)) {
             // Visit the statements in the 'if' block
             for (const stmt of node.ifbody) {
                 if (isAssignment(stmt)) {
-                    const assignment = new AssignmentImpl(node, stmt.variable, stmt.expression as Expression);
-                    //assignment.accept(this);
-                    this.visitAssignmentImpl(assignment);
+                    
+                    this.visitAssignmentImpl(stmt);
                 }
                 if (isFunctionCallStatement(stmt)) {
-                    this.visitFunctionCallStatementImpl(stmt as FunctionCallStatementImpl);  
+                    this.visitFunctionCallStatementImpl(stmt);  
                 }
                 if (isVariableDeclaration(stmt)) {
-                    const variableDeclaration = new VariableDeclarationImpl(node, stmt.name, stmt.type, stmt.initialValue as ExpressionImpl);
-                    //variableDeclaration.accept(this);
-                    this.visitVariableDeclarationImpl(variableDeclaration);
+                    
+                    this.visitVariableDeclarationImpl(stmt);
                 }
                 if(isIfStatement(stmt)) {
-                    const ifStatement = new IfStatementImpl(node, stmt.condition, stmt.ifbody, stmt.elsebody);
-                    //ifStatement.accept(this);
-                    this.visitIfStatementImpl(ifStatement);
+                    this.visitIfStatementImpl(stmt);
                 }
                 if(isWhileLoop(stmt)) {
-                    const whileLoop = new WhileLoopImpl(node, stmt.condition, stmt.body);
-                    //whileLoop.accept(this);
-                    this.visitWhileLoopImpl(whileLoop);
+                    this.visitWhileLoopImpl(stmt);
                 }
             }
         }else {
@@ -170,70 +149,57 @@ export class MyRoboMLVisitor implements RoboMLVisitor {
             if (node.elsebody.length > 0) {
                 for (const stmt of node.elsebody) {
                     if (isAssignment(stmt)) {
-                        const assignment = new AssignmentImpl(node, stmt.variable, stmt.expression as Expression);
-                        //assignment.accept(this);
-                        this.visitAssignmentImpl(assignment);
+                        this.visitAssignmentImpl(stmt);
                     }
                     if (isFunctionCallStatement(stmt)) {
-                        this.visitFunctionCallStatementImpl(stmt as FunctionCallStatementImpl);
+                        this.visitFunctionCallStatementImpl(stmt);
                     }
                     if (isVariableDeclaration(stmt)) {
-                        const variableDeclaration = new VariableDeclarationImpl(node, stmt.name, stmt.type, stmt.initialValue as ExpressionImpl);
-                        //variableDeclaration.accept(this);
-                        this.visitVariableDeclarationImpl(variableDeclaration);
+                        this.visitVariableDeclarationImpl(stmt);
                     }
                     if(isIfStatement(stmt)) {
-                        const ifStatement = new IfStatementImpl(node, stmt.condition, stmt.ifbody, stmt.elsebody);
-                        //ifStatement.accept(this);
-                        this.visitIfStatementImpl(ifStatement);
+                        this.visitIfStatementImpl(stmt);
                     }
                     if(isWhileLoop(stmt)) {
-                        const whileLoop = new WhileLoopImpl(node, stmt.condition, stmt.body);
-                        //whileLoop.accept(this);
-                        this.visitWhileLoopImpl(whileLoop);
+                        this.visitWhileLoopImpl(stmt);
                     }
                 }
             }
         }
+    }
 
         return null;
     }
-    visitWhileLoopImpl(node: WhileLoopImpl) {
-        while (this.visitExpressionImpl(node.condition as ExpressionImpl)) {
+    visitWhileLoopImpl(node: WhileLoop) {
+        if(isExpression(node.condition)){
+        while (this.visitExpressionImpl(node.condition)) {
             // Visit the statements in the loop body
             for (const stmt of node.body) {
                 if (isAssignment(stmt)) {
-                    const assignment = new AssignmentImpl(node, stmt.variable, stmt.expression as Expression);
-                    //assignment.accept(this);
-                    this.visitAssignmentImpl(assignment);
+                    this.visitAssignmentImpl(stmt);
                 }
                 if (isFunctionCallStatement(stmt)) {
-                    this.visitFunctionCallStatementImpl(stmt as FunctionCallStatementImpl);
+                    this.visitFunctionCallStatementImpl(stmt);
                 }
                 if (isVariableDeclaration(stmt)) {
-                    const variableDeclaration = new VariableDeclarationImpl(node, stmt.name, stmt.type, stmt.initialValue as ExpressionImpl);
-                    //variableDeclaration.accept(this);
-                    this.visitVariableDeclarationImpl(variableDeclaration);
+                    this.visitVariableDeclarationImpl(stmt);
                 }
                 if(isIfStatement(stmt)) {
-                    const ifStatement = new IfStatementImpl(node, stmt.condition, stmt.ifbody, stmt.elsebody);
-                    //ifStatement.accept(this);
-                    this.visitIfStatementImpl(ifStatement);
+                    this.visitIfStatementImpl(stmt);
                 }
                 if(isWhileLoop(stmt)) {
-                    const whileLoop = new WhileLoopImpl(node, stmt.condition, stmt.body);
-                    //whileLoop.accept(this);
-                    this.visitWhileLoopImpl(whileLoop);
+                    this.visitWhileLoopImpl(stmt);
                 }
             }
         }
+    }
 
         return null;
     }
-    visitForLoopImpl(node: ForLoopImpl) {
+    visitForLoopImpl(node: ForLoop) {
         throw new Error('Method not implemented.');
     }
-    visitRotationImpl(node: RotationImpl) {
+    visitRotationImpl(node: Rotation) {
         // Visit the angle expression
         if (isExpression(node.angle)) {
             this.visitExpressionImpl(node.angle as ExpressionImpl);
@@ -244,24 +210,33 @@ export class MyRoboMLVisitor implements RoboMLVisitor {
     visitExpressionImpl(node: Expression): any {
         // Handle the `ge` expression (if present)
         if (node.ge) {
-            return this.visitExpressionImpl(node.ge as ExpressionImpl);
+            return this.visitExpressionImpl(node.ge);
         }
 
         // Handle the `ne` expression (if present)
         if (node.ne) {
-            return -1 * this.visitExpressionImpl(node.ne as ExpressionImpl);
+            return -1 * this.visitExpressionImpl(node.ne);
         }
 
         if (isBinExpr(node)) {
-            return this.visitBinExprImpl(node as BinExprImpl);
+            return this.visitBinExprImpl(node);
+        }
+        if (isBooleanLiteral(node)) {
+            return this.visitBooleanLiteralImpl(node);
+        }
+        if (isNumberLiteral(node)) {
+            return this.visitNumberLiteralImpl(node);
+        }
+        if(isVariableReference(node)) {
+            return this.visitVariableReferenceImpl(node);
         }
 
         return 'bim';
     }
-    visitGetDistanceImpl(node: GetDistanceImpl) {
+    visitGetDistanceImpl(node: GetDistance) {
         throw new Error('Method not implemented.');
     }
-    DeplacementImpl(node: DeplacementImpl) {
+    DeplacementImpl(node: Deplacement) {
         // Visit the distance expression
         this.visitExpressionImpl(node.distance as ExpressionImpl);
 
@@ -276,7 +251,7 @@ export class MyRoboMLVisitor implements RoboMLVisitor {
 
         return null;
     }
-    visitSettingImpl(node: SettingImpl) {
+    visitSettingImpl(node: Setting) {
         // Handle the unit property
         if (node.unit) {
             // Perform type checking or unit conversion for the unit value
@@ -287,44 +262,42 @@ export class MyRoboMLVisitor implements RoboMLVisitor {
 
         return null;
     }
-    visitGetTimeImpl(node: GetTimeImpl) {
+    visitGetTimeImpl(node: GetTime) {
         throw new Error('Method not implemented.');
     }
-    visitBasicTypeImpl(node: BasicTypeImpl) {
+    visitBasicTypeImpl(node: BasicType) {
         throw new Error('Method not implemented.');
     }
-    visitUserDefinedTypeImpl(node: UserDefinedTypeImpl) {
+    visitUserDefinedTypeImpl(node: UserDefinedType) {
         throw new Error('Method not implemented.');
     }
-visitBinExprImpl(node: BinExpr) {
+    visitBinExprImpl(node: BinExpr) {
         let left: any = node.e1;
         let right: any = node.e2;
 
         if (isBinExpr(left)) {
-            const binExprImpl: BinExprImpl = new BinExprImpl(left.e1, left.e2, left.op);
-            left = this.visitBinExprImpl(binExprImpl);
+            left = this.visitBinExprImpl(left);
         }
         if (isBinExpr(right)) {
-            const binExprImpl: BinExprImpl = new BinExprImpl(right.e1, right.e2, right.op);
-            right = this.visitBinExprImpl(binExprImpl);
+            right = this.visitBinExprImpl(right);
         }
         if(isNumberLiteral(left)) {
-            left = this.visitNumberLiteralImpl(left as NumberLiteralImpl);
+            left = this.visitNumberLiteralImpl(left);
         }
         if(isNumberLiteral(right)) {
-            right = this.visitNumberLiteralImpl(right as NumberLiteralImpl);
+            right = this.visitNumberLiteralImpl(right);
         }
         if(isVariableReference(left)) {
-            left = this.visitVariableReferenceImpl(left as VariableReferenceImpl);
+            left = this.visitVariableReferenceImpl(left);
         }
         if(isVariableReference(right)) {
-            right = this.visitVariableReferenceImpl(right as VariableReferenceImpl);
+            right = this.visitVariableReferenceImpl(right);
         }
         if(isBooleanLiteral(left)) {
-            left = this.visitBooleanLiteralImpl(left as BooleanLiteralImpl);
+            left = this.visitBooleanLiteralImpl(left);
         }
         if(isBooleanLiteral(right)) {
-            right = this.visitBooleanLiteralImpl(right as BooleanLiteralImpl);
+            right = this.visitBooleanLiteralImpl(right);
         }
 
         // Handle the binary operator (op) based on its type
@@ -377,38 +350,43 @@ visitBinExprImpl(node: BinExpr) {
     visitNumberLiteralImpl(node: NumberLiteral) {
         return node.value;
     }
-    visitVariableReferenceImpl(node: VariableReferenceImpl): any {
-        const variableDeclaration = node.variable.ref as VariableDeclarationImpl;
-        if (isExpression(variableDeclaration.initialValue)) {
-            // Check the variable's type
-            if (variableDeclaration.type === 'bool') {
-                if (isBooleanLiteral(variableDeclaration.initialValue)) {
-                    return this.visitBooleanLiteralImpl(variableDeclaration.initialValue as BooleanLiteralImpl);
+    visitVariableReferenceImpl(node: VariableReference): any {
+        const variableDeclaration = node.variable.ref;
+        if(isVariableDeclaration(variableDeclaration) ){
+            if (isExpression(variableDeclaration.initialValue)) {
+                // Check the variable's type
+                if (variableDeclaration.type === 'bool') {
+                    if (isBooleanLiteral(variableDeclaration.initialValue)) {
+                        return this.visitBooleanLiteralImpl(variableDeclaration.initialValue);
+                    }
+                } else if (variableDeclaration.type === 'number') {
+                    if (isNumberLiteral(variableDeclaration.initialValue)) {
+                        return this.visitNumberLiteralImpl(variableDeclaration.initialValue);
+                    }
                 }
-            } else if (variableDeclaration.type === 'number') {
-                if (isNumberLiteral(variableDeclaration.initialValue)) {
-                    return this.visitNumberLiteralImpl(variableDeclaration.initialValue as NumberLiteralImpl);
+                if(isExpression(variableDeclaration.initialValue)) {
+                    return this.visitExpressionImpl(variableDeclaration.initialValue as ExpressionImpl);
                 }
             }
+            if (isFunctionCallStatement(variableDeclaration.initialValue)) {
+                return this.visitFunctionCallStatementImpl(variableDeclaration.initialValue);
+            }
+            if (isInternalFunctionCallStatement(variableDeclaration.initialValue) && isInternalFunctionCall(variableDeclaration.initialValue) && isGetDistance(variableDeclaration.initialValue)) {
+                return this.visitGetDistanceImpl(variableDeclaration.initialValue);
+            }
+            if (isInternalFunctionCallStatement(variableDeclaration.initialValue) && isInternalFunctionCall(variableDeclaration.initialValue) && isGetTime(variableDeclaration.initialValue)) {
+                return this.visitGetTimeImpl(variableDeclaration.initialValue);
+            }
+            if (isVariableReference(variableDeclaration.initialValue)) {
+                return this.visitVariableReferenceImpl(variableDeclaration.initialValue);
+            }
         }
-        if (isFunctionCallStatement(variableDeclaration.initialValue)) {
-            return this.visitFunctionCallStatementImpl(variableDeclaration.initialValue as FunctionCallStatementImpl);
-        }
-        if (isInternalFunctionCallStatement(variableDeclaration.initialValue) && isInternalFunctionCall(variableDeclaration.initialValue) && isGetDistance(variableDeclaration.initialValue)) {
-            return this.visitGetDistanceImpl(variableDeclaration.initialValue as GetDistanceImpl);
-        }
-        if (isInternalFunctionCallStatement(variableDeclaration.initialValue) && isInternalFunctionCall(variableDeclaration.initialValue) && isGetTime(variableDeclaration.initialValue)) {
-            return this.visitGetTimeImpl(variableDeclaration.initialValue as GetTimeImpl);
-        }
-        if (isVariableReference(variableDeclaration.initialValue)) {
-            return this.visitVariableReferenceImpl(variableDeclaration.initialValue as VariableReferenceImpl);
-        }
-        return null;
+        return variableDeclaration;
     }
-    public visitModelimpl(node: Modelimpl): any {
+    public visitModelimpl(node: Model): any {
         node.functions.forEach(funct => {
             if(funct.name === 'entry') {
-                this.visitFunctImpl(funct as FunctImpl);
+            this.visitFunctImpl(funct as Funct);
             }
         })
         return null;
