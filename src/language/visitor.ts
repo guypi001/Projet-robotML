@@ -16,7 +16,7 @@ export interface RoboMLVisitor{
     visitRotationImpl(node : RotationImpl) : any;
     visitExpressionImpl(node : ExpressionImpl) : any;
     visitGetDistanceImpl(node : GetDistanceImpl) : any;
-    DeplacementImpl(node : DeplacementImpl) : any;
+    visitDeplacementImpl(node : DeplacementImpl) : any;
     visitSettingImpl(node : SettingImpl) : any;
     visitGetTimeImpl(node : GetTimeImpl) : any;
     visitBasicTypeImpl(node : BasicTypeImpl) : any;
@@ -285,7 +285,7 @@ export class DeplacementImpl implements ASTInterfaces.Deplacement{
         this.unit2 = unit2;
     }
     accept (visitor: RoboMLVisitor) : any {
-        return visitor.DeplacementImpl(this);
+        return visitor.visitDeplacementImpl(this);
     }
 }
 

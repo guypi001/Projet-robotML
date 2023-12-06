@@ -1,4 +1,4 @@
-import {  isAssignment, isExpression,  isVariableDeclaration, type Model } from '../language/generated/ast.js';
+import {   type Model } from '../language/generated/ast.js';
 import chalk from 'chalk';
 import { Command } from 'commander';
 import { RobotLanguageLanguageMetaData } from '../language/generated/module.js';
@@ -11,16 +11,7 @@ export const generateAction = async (fileName: string, opts: GenerateOptions): P
     const services = createRobotLanguageServices(NodeFileSystem).RobotLanguage;
     const model = await extractAstNode<Model>(fileName, services);
     const rob = new MyRoboMLVisitor();
-    model.functions.forEach(f => {
-        f.body.forEach(s => {
-            if(isVariableDeclaration(s) && isExpression(s.initialValue) ) {
-                console.log(chalk.green(`[DEBUG] Variable declaration: ${s.name} = ${rob.visitExpressionImpl(s.initialValue)}`));
-            }
-            if(isAssignment(s) && isExpression(s.expression)) {
-                console.log(chalk.green(`[DEBUG] Assignment: ${s.variable.ref?.name} = ${rob.visitExpressionImpl(s.expression)}`));
-            }
-        })
-    })
+    rob.visitModelimpl(model);
 };
 
 export const parseAndValidate = async (fileName: string): Promise<void> => {

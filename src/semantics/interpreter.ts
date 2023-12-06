@@ -1,12 +1,14 @@
-import { Assignment, BasicType, BinExpr, BooleanLiteral, Deplacement, ForLoop, Funct, FunctionCallStatement, FunctionParameter, GetDistance, GetTime, IfStatement, Model, NumberLiteral, Rotation, Setting, UserDefinedType, VariableDeclaration, VariableReference, WhileLoop, isAssignment, isBinExpr, isBooleanLiteral, isDeplacement, isExpression, isFunctionCallStatement, isGetDistance, isGetTime, isIfStatement, isInternalFunctionCall, isInternalFunctionCallStatement, isNumberLiteral, isVariableDeclaration, isVariableReference, isWhileLoop } from '../language/generated/ast.js';
-import {  ExpressionImpl, RoboMLVisitor } from '../language/visitor.js';
+import { Assignment, BasicType, BinExpr, BooleanLiteral, Deplacement, ForLoop, Funct, FunctionCallStatement, FunctionParameter, GetDistance, GetTime, IfStatement, Model, NumberLiteral, Rotation, Setting, UserDefinedType, VariableDeclaration, VariableReference, WhileLoop, isAssignment, isBinExpr, isBooleanLiteral, isDeplacement, isExpression, isFunctionCallStatement, isGetDistance, isGetTime, isIfStatement, isInternalFunctionCall, isInternalFunctionCallStatement, isNumberLiteral, isRotation, isSetting, isVariableDeclaration, isVariableReference, isWhileLoop } from '../language/generated/ast.js';
+import {   RoboMLVisitor } from '../language/visitor.js';
 import { Expression } from '../language/generated/ast.js';
+import chalk from 'chalk';
 
 export class MyRoboMLVisitor implements RoboMLVisitor {
-visitFunctImpl(node: Funct) {
+    visitFunctImpl(node: Funct) {
         // Visit function parameters
         for (const param of node.parameters) {
             //param.accept(this);
+            console.log(chalk.green(`[DEBUG] Function parameter: ${param.name} of type ${param.type}`));
             this.visitVariableDeclarationImpl(param);
         }
 
@@ -16,12 +18,14 @@ visitFunctImpl(node: Funct) {
 
             if (isAssignment(stmt)) {
                 this.visitAssignmentImpl(stmt);
+                console.log(chalk.green(`[DEBUG] Assigment: ${stmt.variable.ref?.name} of type ${stmt.variable.ref?.type} et valeur ${stmt.variable.ref?.initialValue}`));
             }
             if (isFunctionCallStatement(stmt)) {
                 this.visitFunctionCallStatementImpl(stmt);
             }
             if (isVariableDeclaration(stmt)) {
                 this.visitVariableDeclarationImpl(stmt);
+                console.log(chalk.green(`[DEBUG] Variable declaration: ${stmt.name} of type ${stmt.type} et valeur ${stmt.initialValue}`));
             }
             if(isIfStatement(stmt)) {
                 this.visitIfStatementImpl(stmt);
@@ -37,12 +41,13 @@ visitFunctImpl(node: Funct) {
                     this.visitGetTimeImpl(stmt);
                 }
                 if (isDeplacement(stmt)) {
-                    if(stmt.function === 'Forward') {
-                        this.visitDeplacementImpl(stmt);
-                    }
-                    if(stmt.function === 'Backward') {
-                        this.visitDeplacementImpl(stmt);
-                    }
+                    this.VisitDeplacementImpl(stmt);
+                }
+                if (isRotation(stmt)) {
+                    this.visitRotationImpl(stmt);
+                }
+                if (isSetting(stmt)) {
+                    this.visitSettingImpl(stmt);
                 }
             }
         }
@@ -97,7 +102,6 @@ visitFunctImpl(node: Funct) {
                 //node.initialValue.accept(this);
                 value = this.visitGetTimeImpl(node.initialValue);
             }
-
         }
         node.initialValue = value;
 
@@ -105,21 +109,45 @@ visitFunctImpl(node: Funct) {
     }
     visitAssignmentImpl(node: Assignment) {
         // Retrieve the variable declaration referenced by the `variable` property
-        const variableDeclaration = node.variable.ref;
-        if(isVariableDeclaration(variableDeclaration) ){
+        let expressionValue: any = null;
+        if(node.variable.ref) {
+        if(isVariableDeclaration(node.variable.ref) ){
             if(isExpression(node.expression)) {
                 // Evaluate the expression value
-                const expressionValue = this.visitExpressionImpl(node.expression);
-
-                // Assign the evaluated expression value to the variable
-                variableDeclaration.initialValue = expressionValue;
+                expressionValue = this.visitExpressionImpl(node.expression);
+            }
+            if(isFunctionCallStatement(node.expression)) {
+                // Evaluate the expression value
+                //const expressionValue = this.visitFunctionCallStatementImpl(node.expression);
+            }
+            if (isInternalFunctionCallStatement(node.expression) && isInternalFunctionCall(node.expression) && isGetDistance(node.expression)) {
+                // Evaluate the expression value
+                expressionValue = this.visitGetDistanceImpl(node.expression);
+            }
+            if (isInternalFunctionCallStatement(node.expression) && isInternalFunctionCall(node.expression) && isGetTime(node.expression)) {
+                // Evaluate the expression value
+                expressionValue = this.visitGetTimeImpl(node.expression);
             }
         }
-        return variableDeclaration;
+        
+        // Update the variable declaration's initial value avec une valeur literale, faire un cast
+        node.variable.ref.initialValue = expressionValue;
+
+        }
+        return expressionValue;
     }
 
     visitDeplacementImpl(node: Deplacement) {
-        throw new Error('Method not implemented.');
+        if(isExpression(node.distance)){
+            if(node.function === 'Forward') {
+                // Visit the distance expression
+                console.log(chalk.green(`[DEBUG] Variable declaration: ${node.function} de ${this.visitExpressionImpl(node.distance)} cm`));
+            }
+            if(node.function === 'Backward') {
+                // Visit the distance expression
+                console.log(chalk.green(`[DEBUG] Variable declaration: ${node.function} de ${this.visitExpressionImpl(node.distance)} cm`));
+            }
+        }
     }
     visitIfStatementImpl(node: IfStatement) {
         if(isExpression(node.condition)){
@@ -190,6 +218,18 @@ visitFunctImpl(node: Funct) {
                 if(isWhileLoop(stmt)) {
                     this.visitWhileLoopImpl(stmt);
                 }
+                if(isDeplacement(stmt)) {
+                    this.visitDeplacementImpl(stmt);
+                }
+                if(isRotation(stmt)) {
+                    this.visitRotationImpl(stmt);
+                }
+                if(isSetting(stmt)) {
+                    this.visitSettingImpl(stmt);
+                }
+                if(isGetDistance(stmt)) {
+                    this.visitGetDistanceImpl(stmt);
+                }
             }
         }
     }
@@ -202,7 +242,7 @@ visitFunctImpl(node: Funct) {
     visitRotationImpl(node: Rotation) {
         // Visit the angle expression
         if (isExpression(node.angle)) {
-            this.visitExpressionImpl(node.angle as ExpressionImpl);
+            console.log(chalk.green(`[DEBUG]  ${node.function} de ${this.visitExpressionImpl(node.angle)} deg`));
         }
 
   return null;
@@ -228,42 +268,37 @@ visitFunctImpl(node: Funct) {
             return this.visitNumberLiteralImpl(node);
         }
         if(isVariableReference(node)) {
+            console.log("ooo")
             return this.visitVariableReferenceImpl(node);
         }
 
         return 'bim';
     }
-    visitGetDistanceImpl(node: GetDistance) {
-        throw new Error('Method not implemented.');
+    visitGetDistanceImpl(node: GetDistance): any {
+        return 60;
     }
-    DeplacementImpl(node: Deplacement) {
+    VisitDeplacementImpl(node: Deplacement) {
         // Visit the distance expression
-        this.visitExpressionImpl(node.distance as ExpressionImpl);
-
-        // Handle the unit and unit2 properties (if present)
-        if (node.unit) {
-            // Handle the unit value (e.g., type checking, unit conversion)
-        }
-
-        if (node.unit2) {
-            // Handle the unit2 value (e.g., type checking, unit conversion)
+        if(isExpression(node.distance)){
+            if(node.function === 'Forward') {
+                // Visit the distance expression
+                console.log(chalk.green(`[DEBUG]  ${node.function} de ${this.visitExpressionImpl(node.distance)} cm`));
+            }
+            if(node.function === 'Backward') {
+                // Visit the distance expression
+                console.log(chalk.green(`[DEBUG]  ${node.function} de ${this.visitExpressionImpl(node.distance)} cm`));
+            }
         }
 
         return null;
     }
     visitSettingImpl(node: Setting) {
-        // Handle the unit property
-        if (node.unit) {
-            // Perform type checking or unit conversion for the unit value
+        if(isExpression(node.vitesse)){
+            console.log(chalk.green(`[DEBUG] Setting vitesse:  = ${this.visitExpressionImpl(node.vitesse)}`));
         }
-
-        // Visit the vitesse expression
-        this.visitExpressionImpl(node.vitesse as ExpressionImpl);
-
-        return null;
     }
-    visitGetTimeImpl(node: GetTime) {
-        throw new Error('Method not implemented.');
+    visitGetTimeImpl(node: GetTime): any {
+        return 5;
     }
     visitBasicTypeImpl(node: BasicType) {
         throw new Error('Method not implemented.');
@@ -351,42 +386,23 @@ visitFunctImpl(node: Funct) {
         return node.value;
     }
     visitVariableReferenceImpl(node: VariableReference): any {
-        const variableDeclaration = node.variable.ref;
-        if(isVariableDeclaration(variableDeclaration) ){
-            if (isExpression(variableDeclaration.initialValue)) {
-                // Check the variable's type
-                if (variableDeclaration.type === 'bool') {
-                    if (isBooleanLiteral(variableDeclaration.initialValue)) {
-                        return this.visitBooleanLiteralImpl(variableDeclaration.initialValue);
-                    }
-                } else if (variableDeclaration.type === 'number') {
-                    if (isNumberLiteral(variableDeclaration.initialValue)) {
-                        return this.visitNumberLiteralImpl(variableDeclaration.initialValue);
+        if(node.variable.ref) {
+            if(isVariableDeclaration(node.variable.ref)) {
+                if(node.variable.ref.initialValue) {
+                    if(isNumberLiteral(node.variable.ref.initialValue)) {
+                        return this.visitNumberLiteralImpl(node.variable.ref.initialValue);
                     }
                 }
-                if(isExpression(variableDeclaration.initialValue)) {
-                    return this.visitExpressionImpl(variableDeclaration.initialValue as ExpressionImpl);
-                }
-            }
-            if (isFunctionCallStatement(variableDeclaration.initialValue)) {
-                return this.visitFunctionCallStatementImpl(variableDeclaration.initialValue);
-            }
-            if (isInternalFunctionCallStatement(variableDeclaration.initialValue) && isInternalFunctionCall(variableDeclaration.initialValue) && isGetDistance(variableDeclaration.initialValue)) {
-                return this.visitGetDistanceImpl(variableDeclaration.initialValue);
-            }
-            if (isInternalFunctionCallStatement(variableDeclaration.initialValue) && isInternalFunctionCall(variableDeclaration.initialValue) && isGetTime(variableDeclaration.initialValue)) {
-                return this.visitGetTimeImpl(variableDeclaration.initialValue);
-            }
-            if (isVariableReference(variableDeclaration.initialValue)) {
-                return this.visitVariableReferenceImpl(variableDeclaration.initialValue);
             }
         }
-        return variableDeclaration;
+        return 'y';
     }
     public visitModelimpl(node: Model): any {
+    console.log(chalk.green(`[DEBUG] Model: `));
         node.functions.forEach(funct => {
             if(funct.name === 'entry') {
-            this.visitFunctImpl(funct as Funct);
+                console.log(chalk.green(`[DEBUG] Function: ${funct.name}`));
+                this.visitFunctImpl(funct as Funct);
             }
         })
         return null;
