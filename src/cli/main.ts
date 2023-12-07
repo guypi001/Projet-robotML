@@ -1,4 +1,4 @@
-import {   type Model } from '../language/generated/ast.js';
+import {  isAssignment, isExpression,  isVariableDeclaration, type Model } from '../language/generated/ast.js';
 import chalk from 'chalk';
 import { Command } from 'commander';
 import { RobotLanguageLanguageMetaData } from '../language/generated/module.js';
@@ -6,14 +6,24 @@ import { createRobotLanguageServices } from '../language/robot-language-module.j
 import { extractAstNode, extractDocument } from './cli-util.js';
 import { NodeFileSystem } from 'langium/node';
 import { MyRoboMLVisitor } from '../semantics/interpreter.js';
-
 export const generateAction = async (fileName: string, opts: GenerateOptions): Promise<void> => {
     const services = createRobotLanguageServices(NodeFileSystem).RobotLanguage;
     const model = await extractAstNode<Model>(fileName, services);
     const rob = new MyRoboMLVisitor();
-    rob.visitModelimpl(model);
+    model.functions.forEach(f => {
+        f.body.forEach(s => {
+            if (isVariableDeclaration(s) && isExpression(s.initialValue)) {
+                console.log(chalk.green(`[DEBUG] Variable declaration: ${s.name} = ${rob.visitExpressionImpl(s.initialValue)}`));
+            }
+            if (isAssignment(s) && isExpression(s.expression)) {
+                const variableRef = s.variable.ref;
+                if (variableRef && isExpression(variableRef.initialValue)) {
+                    console.log(chalk.green(`[DEBUG] Assignment: ${variableRef.name} = ${rob.visitAssignmentImpl(s)}`));
+                }
+            }
+        });
+    });
 };
-
 export const parseAndValidate = async (fileName: string): Promise<void> => {
     // retrieve the services for our language
     const services = createRobotLanguageServices(NodeFileSystem).RobotLanguage;
@@ -30,18 +40,14 @@ export const parseAndValidate = async (fileName: string): Promise<void> => {
         process.stdout.write(chalk.red(`[DEBUG] Failed to parse and validate ${fileName}! \n`));
     }
 };
-
 export type GenerateOptions = {
     destination?: string;
 }
-
 export default function(): void {
     const program = new Command();
-
     program
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         .version("0.0.1");
-
     const fileExtensions = RobotLanguageLanguageMetaData.fileExtensions.join(', ');
     program
         .command('generate')
@@ -49,12 +55,10 @@ export default function(): void {
         .option('-d, --destination <dir>', 'destination directory of generating')
         .description('generates JavaScript code that prints "Hello, {name}!" for each greeting in a source file')
         .action(generateAction);
-
     program
         .command('parseAndValidate')
         .argument('<file>', 'Source file to parse & validate (ending in ${fileExtensions})')
         .description('Indicates where a program parses & validates successfully, but produces no output code')
         .action(parseAndValidate) 
-
     program.parse(process.argv);
 }
