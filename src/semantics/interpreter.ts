@@ -1,4 +1,4 @@
-import { Assignment, BasicType, BinExpr, BooleanLiteral, Deplacement, ForLoop, Funct, FunctionCallStatement, FunctionParameter, GetDistance, GetTime, IfStatement, Model, NumberLiteral, Rotation, Setting, UserDefinedType, VariableDeclaration, VariableReference, WhileLoop, isAssignment, isBinExpr, isBooleanLiteral, isDeplacement, isExpression, isFunctionCallStatement, isGetDistance, isGetTime, isIfStatement, isInternalFunctionCall, isInternalFunctionCallStatement, isNumberLiteral, isVariableDeclaration, isVariableReference, isWhileLoop } from '../language/generated/ast.js';
+import { Assignment, BasicType, BinExpr, BooleanLiteral, Deplacement, ForLoop, Funct, FunctionCallStatement, FunctionParameter, GetDistance, GetTime, IfStatement, Model, NumberLiteral, Rotation, Setting, UserDefinedType, VariableDeclaration, VariableReference, WhileLoop, isAssignment, isBinExpr, isBooleanLiteral, isDeplacement, isExpression, isFunctionCallStatement, isGetDistance, isGetTime, isIfStatement, isInternalFunctionCall, isInternalFunctionCallStatement, isNumberLiteral, isRotation, isVariableDeclaration, isVariableReference, isWhileLoop } from '../language/generated/ast.js';
 import {  BooleanLiteralImpl, ExpressionImpl, NumberLiteralImpl, RoboMLVisitor } from '../language/visitor.js';
 import { Expression } from '../language/generated/ast.js';
 
@@ -16,16 +16,14 @@ visitFunctImpl(node: Funct) {
 
             if (isAssignment(stmt)) {
                 if (stmt.variable.ref) {
-                    stmt.variable.ref.initialValue = this.visitAssignmentImpl(stmt);
-                    console.log(`Assigment ${stmt.variable.ref.name} = ${stmt.variable.ref.initialValue}`);
+                    console.log(`Assigment ${stmt.variable.ref.name} = ${this.visitAssignmentImpl(stmt)}`);
                 }
             }
             if (isFunctionCallStatement(stmt)) {
                 this.visitFunctionCallStatementImpl(stmt);
             }
-            if (isVariableDeclaration(stmt)) {
-                this.visitVariableDeclarationImpl(stmt);
-                console.log(`Variable ${stmt.name} = ${stmt.initialValue}`);
+            if (isVariableDeclaration(stmt) && isExpression(stmt.initialValue)) {
+                console.log(`Variable ${stmt.name} = ${this.visitExpressionImpl(stmt.initialValue)}`);
             }
             if (isIfStatement(stmt)) {
                 this.visitIfStatementImpl(stmt);
@@ -47,6 +45,9 @@ visitFunctImpl(node: Funct) {
                     if(stmt.function === 'Backward') {
                         this.visitDeplacementImpl(stmt);
                     }
+                }
+                if (isRotation(stmt)) {
+                    this.visitRotationImpl(stmt);
                 }
             }
         }
@@ -134,7 +135,7 @@ visitFunctImpl(node: Funct) {
     }
 
     visitDeplacementImpl(node: Deplacement) {
-        throw new Error('Method not implemented.');
+        console.log(`Deplacement ${node.function}(${this.visitExpressionImpl(node.distance)})`);
     }
     visitIfStatementImpl(node: IfStatement) {
         if(isExpression(node.condition)){
@@ -191,7 +192,9 @@ visitFunctImpl(node: Funct) {
             // Visit the statements in the loop body
             for (const stmt of node.body) {
                 if (isAssignment(stmt)) {
-                    this.visitAssignmentImpl(stmt);
+                    if (stmt.variable.ref) {
+                        console.log(`Assigment ${stmt.variable.ref.name} = ${this.visitAssignmentImpl(stmt)}`);
+                    }
                 }
                 if (isFunctionCallStatement(stmt)) {
                     this.visitFunctionCallStatementImpl(stmt);
@@ -215,11 +218,7 @@ visitFunctImpl(node: Funct) {
         throw new Error('Method not implemented.');
     }
     visitRotationImpl(node: Rotation) {
-        // Visit the angle expression
-        if (isExpression(node.angle)) {
-            this.visitExpressionImpl(node.angle as ExpressionImpl);
-        }
-  return null;
+        console.log(`Rotation ${node.function}(${this.visitExpressionImpl(node.angle)})`);
     }
     visitExpressionImpl(node: Expression): any {
         // Handle the `ge` expression (if present)
@@ -275,7 +274,7 @@ visitFunctImpl(node: Funct) {
         return null;
     }
     visitGetTimeImpl(node: GetTime) {
-        throw new Error('Method not implemented.');
+        return 1000
     }
     visitBasicTypeImpl(node: BasicType) {
         throw new Error('Method not implemented.');
