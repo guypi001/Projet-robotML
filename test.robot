@@ -1,20 +1,11 @@
 let void entry () {
-    setSpeed(150 mm) // distance per second (here 150mm/s)
-    var number count = 0
-    loop count < 5
-    {	
-        count = count + 1
-        square()
+    setSpeed(200 mm) // distance per second (here 200mm/s)
+    var number time = getTimestamp()
+    loop time < 60000
+    {
+        var number dist = getDistance() in cm
+        Forward dist - 25 in cm
+        Clock 90
+        time = time + 10000
     }
-}
-
-let void square(){
-    Forward 30 cm
-    Clock 90
-    Forward 300 mm
-    Clock 90
-    Forward 30 cm
-    Clock 90
-    Forward 300 mm
-    Clock 90
 }

@@ -129,6 +129,30 @@ visitFunctImpl(node: Funct) {
                 }
                 
             }
+            if(isFunctionCallStatement(node.expression)) {
+                //node.variable.ref.initialValue = node.expression;
+                value = this.visitFunctionCallStatementImpl(node.expression);
+                if(node.variable.ref.type === 'number') {
+                    let asss = new NumberLiteralImpl(value);
+                    node.variable.ref.initialValue = asss;
+                }
+            }
+            if(isInternalFunctionCallStatement(node.expression) && isInternalFunctionCall(node.expression) && isGetDistance(node.expression)) {
+                //node.variable.ref.initialValue = node.expression;
+                value = this.visitGetDistanceImpl(node.expression);
+                if(node.variable.ref.type === 'number') {
+                    let asss = new NumberLiteralImpl(value);
+                    node.variable.ref.initialValue = asss;
+                }
+            }
+            if(isInternalFunctionCallStatement(node.expression) && isInternalFunctionCall(node.expression) && isGetTime(node.expression)) {
+                //node.variable.ref.initialValue = node.expression;
+                value = this.visitGetTimeImpl(node.expression);
+                if(node.variable.ref.type === 'number') {
+                    let asss = new NumberLiteralImpl(value);
+                    node.variable.ref.initialValue = asss;
+                }
+            }
         }
         
         return value;
@@ -200,13 +224,40 @@ visitFunctImpl(node: Funct) {
                     this.visitFunctionCallStatementImpl(stmt);
                 }
                 if (isVariableDeclaration(stmt)) {
-                    this.visitVariableDeclarationImpl(stmt);
+                    if (isVariableDeclaration(stmt)) {
+                        if (isExpression(stmt.initialValue)) {
+                            console.log(`Variable ${stmt.name} = ${this.visitExpressionImpl(stmt.initialValue)}`);
+                        }
+                        if (isFunctionCallStatement(stmt.initialValue)) {
+                            console.log(`Variable ${stmt.name} = ${this.visitFunctionCallStatementImpl(stmt.initialValue)}`);
+                        }
+                        if (isInternalFunctionCallStatement(stmt.initialValue) && isInternalFunctionCall(stmt.initialValue) && isGetDistance(stmt.initialValue)) {
+                            console.log(`Variable ${stmt.name} = ${this.visitGetDistanceImpl(stmt.initialValue)}`);
+                        }
+                        if (isInternalFunctionCallStatement(stmt.initialValue) && isInternalFunctionCall(stmt.initialValue) && isGetTime(stmt.initialValue)) {
+                            console.log(`Variable ${stmt.name} = ${this.visitGetTimeImpl(stmt.initialValue)}`);
+                        }
+                    }
                 }
                 if(isIfStatement(stmt)) {
                     this.visitIfStatementImpl(stmt);
                 }
                 if(isWhileLoop(stmt)) {
                     this.visitWhileLoopImpl(stmt);
+                }
+                if(isInternalFunctionCallStatement(stmt) && isInternalFunctionCall(stmt) && isGetDistance(stmt)) {
+                    this.visitGetDistanceImpl(stmt);
+                }
+                if(isInternalFunctionCallStatement(stmt) && isInternalFunctionCall(stmt) && isGetTime(stmt)) {
+                    this.visitGetTimeImpl(stmt);
+                }
+                if(isInternalFunctionCallStatement(stmt) && isInternalFunctionCall(stmt) && isDeplacement(stmt)) {
+                    if(stmt.function === 'Forward') {
+                        this.visitDeplacementImpl(stmt);
+                    }
+                    if(stmt.function === 'Backward') {
+                        this.visitDeplacementImpl(stmt);
+                    }
                 }
             }
         }
@@ -247,7 +298,7 @@ visitFunctImpl(node: Funct) {
         return 'bim';
     }
     visitGetDistanceImpl(node: GetDistance) {
-        throw new Error('Method not implemented.');
+        return 1000;
     }
     DeplacementImpl(node: Deplacement) {
         // Visit the distance expression
