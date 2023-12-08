@@ -2167,14 +2167,14 @@ ${r}`),this.inline?`{${i}}`:i}};function Iq(t,e,r){var n,i;if(t==="linkplain"||t
     },
     {
       "$type": "TerminalRule",
-      "name": "INT",
+      "name": "NUMBER",
       "type": {
         "$type": "ReturnType",
         "name": "number"
       },
       "definition": {
         "$type": "RegexToken",
-        "regex": "/[0-9]+/"
+        "regex": "/(?:(?:-?[0-9]+)?\\\\.[0-9]+)|-?[0-9]+/"
       },
       "fragment": false,
       "hidden": false

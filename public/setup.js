@@ -1,7 +1,6 @@
 import { MonacoEditorLanguageClientWrapper } from './monaco-editor-wrapper/index.js';
 import { buildWorkerDefinition } from "./monaco-editor-workers/index.js";
 import monarchSyntax from "./syntaxes/robot-language.monarch.js";
-import { generate } from "./src/semantics/parseAndValidate.ts";
 
 
 buildWorkerDefinition('./monaco-editor-workers/workers', new URL('', window.location.href).href, false);

@@ -109,7 +109,7 @@ ComparisonExpression infers Expression:
 
 // Règle de production pour un littéral numérique
 NumberLiteral:
-    value=INT;
+    value=NUMBER;
 
 BooleanLiteral:
     value=BOOL;
@@ -138,8 +138,8 @@ hidden terminal WS:
      /\s+/;
 terminal ID:
      /[_a-zA-Z][\w_]*/;
-terminal INT returns number:
-     /[0-9]+/;
+terminal NUMBER returns number:
+     /(?:(?:-?[0-9]+)?\.[0-9]+)|-?[0-9]+/;
 //terminal STRING:
   //   /"(\\.|[^"\\])*"|'(\\.|[^'\\])*'/;
 
