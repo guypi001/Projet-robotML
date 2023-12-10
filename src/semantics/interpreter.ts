@@ -1,14 +1,18 @@
-import { Assignment, BasicType, BinExpr, BooleanLiteral, Deplacement, ForLoop, Funct, FunctionCallStatement, FunctionParameter, GetDistance, GetTime, IfStatement, Model, NumberLiteral, Rotation, Setting, UserDefinedType, VariableDeclaration, VariableReference, WhileLoop, isAssignment, isBinExpr, isBooleanLiteral, isDeplacement, isExpression, isFunctionCallStatement, isGetDistance, isGetTime, isIfStatement, isInternalFunctionCall, isInternalFunctionCallStatement, isNumberLiteral, isRotation, isVariableDeclaration, isVariableReference, isWhileLoop } from '../language/generated/ast.js';
+import { Assignment, BasicType, BinExpr, BooleanLiteral, Deplacement, ForLoop, Funct, FunctionCallStatement, FunctionParameter, GetDistance, GetTime, IfStatement, Model, NumberLiteral, Rotation, Setting, UserDefinedType, VariableDeclaration, VariableReference, WhileLoop, isAssignment, isBinExpr, isBooleanLiteral, isDeplacement, isExpression, isFunctionCallStatement, isGetDistance, isGetTime, isIfStatement, isInternalFunctionCall, isInternalFunctionCallStatement, isNumberLiteral, isRotation, isSetting, isVariableDeclaration, isVariableReference, isWhileLoop } from '../language/generated/ast.js';
 import {  BooleanLiteralImpl, ExpressionImpl, NumberLiteralImpl, RoboMLVisitor } from '../language/visitor.js';
 import { Expression } from '../language/generated/ast.js';
 
 export class MyRoboMLVisitor implements RoboMLVisitor {
+
+    // initialiser une liste de json
+    jsonlist: any[] = []; 
 visitFunctImpl(node: Funct) {
         // Visit function parameters
+        /*
         for (const param of node.parameters) {
             //param.accept(this);
             this.visitVariableDeclarationImpl(param);
-        }
+        }*/
 
         // Visit function statements
 
@@ -49,6 +53,9 @@ visitFunctImpl(node: Funct) {
                 if (isRotation(stmt)) {
                     this.visitRotationImpl(stmt);
                 }
+                if (isSetting(stmt)) {
+                    this.visitSettingImpl(stmt);
+                }
             }
         }
         // Visit return value expression (if applicable)
@@ -71,14 +78,16 @@ visitFunctImpl(node: Funct) {
     }
     visitFunctionCallStatementImpl(node: FunctionCallStatement) {
         // Visit the function parameters
-        for (const param of node.parameters) {
-            this.visitFunctionParameterImpl(param);
+        for (let i = 0; i < node.parameters.length; i++) {
+            const param = node.parameters[i].expression;
+            if (isExpression(param)) {
+                if (node.function.ref ) {
+                    node.function.ref.parameters[i].initialValue = param
+                }
+            }
         }
         // Visit the function reference if it exists
-        if (node.function.ref) {
-            this.visitFunctImpl(node.function.ref);
-        }
-
+        this.visitFunctImpl(node.function.ref as Funct);
 
         return null;
     }
@@ -159,6 +168,8 @@ visitFunctImpl(node: Funct) {
     }
 
     visitDeplacementImpl(node: Deplacement) {
+        // rajouter un json dans la liste jsonlist
+        this.jsonlist.push({function: node.function, distance: this.visitExpressionImpl(node.distance)});
         console.log(`Deplacement ${node.function}(${this.visitExpressionImpl(node.distance)})`);
     }
     visitIfStatementImpl(node: IfStatement) {
@@ -183,6 +194,21 @@ visitFunctImpl(node: Funct) {
                 if(isWhileLoop(stmt)) {
                     this.visitWhileLoopImpl(stmt);
                 }
+                if(isInternalFunctionCallStatement(stmt) && isInternalFunctionCall(stmt) && isGetDistance(stmt)) {
+                    this.visitGetDistanceImpl(stmt);
+                }
+                if(isInternalFunctionCallStatement(stmt) && isInternalFunctionCall(stmt) && isGetTime(stmt)) {
+                    this.visitGetTimeImpl(stmt);
+                }
+                if(isInternalFunctionCallStatement(stmt) && isInternalFunctionCall(stmt) && isDeplacement(stmt)) {
+                    this.visitDeplacementImpl(stmt);
+                }
+                if(isInternalFunctionCallStatement(stmt) && isInternalFunctionCall(stmt) && isRotation(stmt)) {
+                    this.visitRotationImpl(stmt);
+                }
+                if(isInternalFunctionCallStatement(stmt) && isInternalFunctionCall(stmt) && isSetting(stmt)) {
+                    this.visitSettingImpl(stmt);
+                }
             }
         }else {
             // Visit the statements in the 'else' block (if present)
@@ -202,6 +228,21 @@ visitFunctImpl(node: Funct) {
                     }
                     if(isWhileLoop(stmt)) {
                         this.visitWhileLoopImpl(stmt);
+                    }
+                    if(isInternalFunctionCallStatement(stmt) && isInternalFunctionCall(stmt) && isGetDistance(stmt)) {
+                        this.visitGetDistanceImpl(stmt);
+                    }
+                    if(isInternalFunctionCallStatement(stmt) && isInternalFunctionCall(stmt) && isGetTime(stmt)) {
+                        this.visitGetTimeImpl(stmt);
+                    }
+                    if(isInternalFunctionCallStatement(stmt) && isInternalFunctionCall(stmt) && isDeplacement(stmt)) {
+                        this.visitDeplacementImpl(stmt);
+                    }
+                    if(isInternalFunctionCallStatement(stmt) && isInternalFunctionCall(stmt) && isRotation(stmt)) {
+                        this.visitRotationImpl(stmt);
+                    }
+                    if(isInternalFunctionCallStatement(stmt) && isInternalFunctionCall(stmt) && isSetting(stmt)) {
+                        this.visitSettingImpl(stmt);
                     }
                 }
             }
@@ -226,6 +267,7 @@ visitFunctImpl(node: Funct) {
                 if (isVariableDeclaration(stmt)) {
                     if (isVariableDeclaration(stmt)) {
                         if (isExpression(stmt.initialValue)) {
+                            //this.visitExpressionImpl(stmt.initialValue);
                             console.log(`Variable ${stmt.name} = ${this.visitExpressionImpl(stmt.initialValue)}`);
                         }
                         if (isFunctionCallStatement(stmt.initialValue)) {
@@ -259,6 +301,12 @@ visitFunctImpl(node: Funct) {
                         this.visitDeplacementImpl(stmt);
                     }
                 }
+                if(isInternalFunctionCallStatement(stmt) && isInternalFunctionCall(stmt) && isRotation(stmt)) {
+                    this.visitRotationImpl(stmt);
+                }
+                if(isInternalFunctionCallStatement(stmt) && isInternalFunctionCall(stmt) && isSetting(stmt)) {
+                    this.visitSettingImpl(stmt);
+                }
             }
         }
     }
@@ -269,6 +317,8 @@ visitFunctImpl(node: Funct) {
         throw new Error('Method not implemented.');
     }
     visitRotationImpl(node: Rotation) {
+        // rajouter un json dans la liste jsonlist
+        this.jsonlist.push({function: node.function, distance: this.visitExpressionImpl(node.angle)});
         console.log(`Rotation ${node.function}(${this.visitExpressionImpl(node.angle)})`);
     }
     visitExpressionImpl(node: Expression): any {
@@ -298,11 +348,14 @@ visitFunctImpl(node: Funct) {
         return 'bim';
     }
     visitGetDistanceImpl(node: GetDistance) {
+        // rajouter un json dans la liste jsonlist
+        this.jsonlist.push({function: node.function});
         return 1000;
     }
     DeplacementImpl(node: Deplacement) {
         // Visit the distance expression
         this.visitExpressionImpl(node.distance as ExpressionImpl);
+        
 
         // Handle the unit and unit2 properties (if present)
         if (node.unit) {
@@ -315,6 +368,8 @@ visitFunctImpl(node: Funct) {
         return null;
     }
     visitSettingImpl(node: Setting) {
+        // rajouter un json dans la liste jsonlist
+        this.jsonlist.push({function: node.function});
         // Handle the unit property
         if (node.unit) {
             // Perform type checking or unit conversion for the unit value
@@ -325,6 +380,8 @@ visitFunctImpl(node: Funct) {
         return null;
     }
     visitGetTimeImpl(node: GetTime) {
+        // rajouter un json dans la liste jsonlist
+        this.jsonlist.push({function: node.function});
         return 1000
     }
     visitBasicTypeImpl(node: BasicType) {
@@ -451,6 +508,8 @@ visitFunctImpl(node: Funct) {
             this.visitFunctImpl(funct as Funct);
             }
         })
+        console.log(this.jsonlist);
+        //return this.jsonlist;
         return null;
     }
 }

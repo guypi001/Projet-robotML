@@ -28,7 +28,6 @@ const lsWorker = new Worker(workerURL.href, {
 client.setWorker(lsWorker);
 
 
-
 let code = `let void entry () {
     var number count = 0
     loop count < 5
@@ -58,16 +57,42 @@ editorConfig.theme = 'vs-dark';
 editorConfig.useLanguageClient = true;
 editorConfig.useWebSocket = false;
 
+/*
+languageClient.onNotification('browser/DocumentChange', onDocumentChange);
+function onDocumentChange(response) {
+    // implementation goes here
+    console.log(response);
+    module = JSON.parse(response.module);
+}
+*/
+
+// keep a reference to a promise for when the editor is finished starting, we'll use this to setup the canvas on load
+const startingPromise = client.startEditor(document.getElementById("monaco-editor-root"));
+let module = null;
+// setup the canvas when the editor is ready
+
+const languageClient = client.getLanguageClient(); 
+
+const max = (a, b) => {
+    if (a > b) {
+        return a;
+    }
+    return b;
+}
+
+
 const typecheck = (async () => {
     console.info('typechecking current code...');
 
     // To implement (Bonus)
     
-    if(errors.length > 0){
-        const modal = document.getElementById("errorModal");
+    if (module.lexerErrors.length === 0 && 
+        module.parserErrors.length === 0
+    ) {
+        const modal = document.getElementById("validModal");
         modal.style.display = "block";
     } else {
-        const modal = document.getElementById("validModal");
+        const modal = document.getElementById("errorModal");
         modal.style.display = "block";
     }
 });
@@ -75,15 +100,39 @@ const typecheck = (async () => {
 const parseAndValidate = (async () => {
     console.info('validating current code...');
     // To implement
-    const text = editorConfig.getMainCode();
-    errorModal.style.display = "block";
-    
-    
+    console.log(module);
+    let onDocumentChange = (response) => {
+        console.log(response);
+        module = JSON.parse(response.module);
+    }
+    languageClient.onNotification( 'browser/DocumentChange', onDocumentChange);
+
+    validModal.style.display = "block";
 });
 
 const execute = (async () => {
     console.info('running current code...');
     // To implement
+
+    window.setupSimulator = setupSimulator;
+
+    switch (command) {
+        case "Forward":
+            console.log("Forward");
+        window.p5robot.move(dist);
+        case "Backward":
+            console.log("Backward");
+        window.p5robot.move(-dist);
+        case "Clock":
+            console.log("Clock");
+        window.p5robot.turn(angle);
+        case "setSpeed":
+            console.log("setSpeed");
+        case "getDistance":
+            console.log("getDistance");
+        default:
+            console.log("Error");
+    }
 });
 
 const setupSimulator = (scene) => {
@@ -143,5 +192,8 @@ window.onclick = function(event) {
         errorModal.style.display = "none";
     }
   } 
-// keep a reference to a promise for when the editor is finished starting, we'll use this to setup the canvas on load
-const startingPromise = client.startEditor(document.getElementById("monaco-editor-root"));
+
+/*
+startingPromise.then(() => {
+    setupSimulator();
+})*/
