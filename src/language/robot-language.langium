@@ -73,7 +73,7 @@ GetDistance:
     function="getDistance" "(" ")" ("in" unit2=("mm"|"cm"))?;
 
 // Règle de production pour un paramètre de fonction
-FunctionParameter:
+    FunctionParameter:
     expression = (VariableDeclaration | Expression);
 
 Expression:

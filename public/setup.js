@@ -111,28 +111,14 @@ const parseAndValidate = (async () => {
 });
 
 const execute = (async () => {
-    console.info('running current code...');
+    console.info('running 2 current code...');
     // To implement
 
-    window.setupSimulator = setupSimulator;
+    client.getLanguageClient().sendNotification('browser/execute', {
+        content: client.getEditor().getModel().getValue(),
+        uri: client.getEditor().getModel().uri.toString()
+    });
 
-    switch (command) {
-        case "Forward":
-            console.log("Forward");
-        window.p5robot.move(dist);
-        case "Backward":
-            console.log("Backward");
-        window.p5robot.move(-dist);
-        case "Clock":
-            console.log("Clock");
-        window.p5robot.turn(angle);
-        case "setSpeed":
-            console.log("setSpeed");
-        case "getDistance":
-            console.log("getDistance");
-        default:
-            console.log("Error");
-    }
 });
 
 const setupSimulator = (scene) => {
@@ -173,6 +159,7 @@ const setupSimulator = (scene) => {
 window.execute = execute;
 window.typecheck = typecheck;
 window.parseAndValidate = parseAndValidate;
+window.setupSimulator = setupSimulator;
 
 var errorModal = document.getElementById("errorModal");
 var validModal = document.getElementById("validModal");
@@ -197,3 +184,27 @@ window.onclick = function(event) {
 startingPromise.then(() => {
     setupSimulator();
 })*/
+
+client.getLanguageClient().onNotification( 'backend/execute', (params)=> {
+    console.log(params);
+    console.log("backend/execute");
+/*
+    switch (command) {
+        case "Forward":
+            console.log("Forward");
+        window.p5robot.move(dist);
+        case "Backward":
+            console.log("Backward");
+        window.p5robot.move(-dist);
+        case "Clock":
+            console.log("Clock");
+        window.p5robot.turn(angle);
+        case "setSpeed":
+            console.log("setSpeed");
+        case "getDistance":
+            console.log("getDistance");
+        default:
+            console.log("Error");
+            
+    }*/
+});

@@ -20,14 +20,14 @@ visitFunctImpl(node: Funct) {
 
             if (isAssignment(stmt)) {
                 if (stmt.variable.ref) {
-                    console.log(`Assigment ${stmt.variable.ref.name} = ${this.visitAssignmentImpl(stmt)}`);
+                    this.visitAssignmentImpl(stmt);
                 }
             }
             if (isFunctionCallStatement(stmt)) {
                 this.visitFunctionCallStatementImpl(stmt);
             }
             if (isVariableDeclaration(stmt) && isExpression(stmt.initialValue)) {
-                console.log(`Variable ${stmt.name} = ${this.visitExpressionImpl(stmt.initialValue)}`);
+                this.visitVariableDeclarationImpl(stmt);
             }
             if (isIfStatement(stmt)) {
                 this.visitIfStatementImpl(stmt);
@@ -170,7 +170,6 @@ visitFunctImpl(node: Funct) {
     visitDeplacementImpl(node: Deplacement) {
         // rajouter un json dans la liste jsonlist
         this.jsonlist.push({function: node.function, distance: this.visitExpressionImpl(node.distance)});
-        console.log(`Deplacement ${node.function}(${this.visitExpressionImpl(node.distance)})`);
     }
     visitIfStatementImpl(node: IfStatement) {
         if(isExpression(node.condition)){
@@ -258,7 +257,7 @@ visitFunctImpl(node: Funct) {
             for (const stmt of node.body) {
                 if (isAssignment(stmt)) {
                     if (stmt.variable.ref) {
-                        console.log(`Assigment ${stmt.variable.ref.name} = ${this.visitAssignmentImpl(stmt)}`);
+                         this.visitAssignmentImpl(stmt);
                     }
                 }
                 if (isFunctionCallStatement(stmt)) {
@@ -268,16 +267,16 @@ visitFunctImpl(node: Funct) {
                     if (isVariableDeclaration(stmt)) {
                         if (isExpression(stmt.initialValue)) {
                             //this.visitExpressionImpl(stmt.initialValue);
-                            console.log(`Variable ${stmt.name} = ${this.visitExpressionImpl(stmt.initialValue)}`);
+                            this.visitExpressionImpl(stmt.initialValue);
                         }
                         if (isFunctionCallStatement(stmt.initialValue)) {
-                            console.log(`Variable ${stmt.name} = ${this.visitFunctionCallStatementImpl(stmt.initialValue)}`);
+                            this.visitFunctionCallStatementImpl(stmt.initialValue);
                         }
                         if (isInternalFunctionCallStatement(stmt.initialValue) && isInternalFunctionCall(stmt.initialValue) && isGetDistance(stmt.initialValue)) {
-                            console.log(`Variable ${stmt.name} = ${this.visitGetDistanceImpl(stmt.initialValue)}`);
+                            this.visitGetDistanceImpl(stmt.initialValue);
                         }
                         if (isInternalFunctionCallStatement(stmt.initialValue) && isInternalFunctionCall(stmt.initialValue) && isGetTime(stmt.initialValue)) {
-                            console.log(`Variable ${stmt.name} = ${this.visitGetTimeImpl(stmt.initialValue)}`);
+                            this.visitGetTimeImpl(stmt.initialValue);
                         }
                     }
                 }
@@ -319,7 +318,7 @@ visitFunctImpl(node: Funct) {
     visitRotationImpl(node: Rotation) {
         // rajouter un json dans la liste jsonlist
         this.jsonlist.push({function: node.function, distance: this.visitExpressionImpl(node.angle)});
-        console.log(`Rotation ${node.function}(${this.visitExpressionImpl(node.angle)})`);
+        this.visitExpressionImpl(node.angle);
     }
     visitExpressionImpl(node: Expression): any {
         // Handle the `ge` expression (if present)
@@ -369,7 +368,7 @@ visitFunctImpl(node: Funct) {
     }
     visitSettingImpl(node: Setting) {
         // rajouter un json dans la liste jsonlist
-        this.jsonlist.push({function: node.function});
+        this.jsonlist.push({function: node.function, distance: this.visitExpressionImpl(node.vitesse)});
         // Handle the unit property
         if (node.unit) {
             // Perform type checking or unit conversion for the unit value
@@ -417,6 +416,12 @@ visitFunctImpl(node: Funct) {
         }
         if(isBooleanLiteral(right)) {
             right = this.visitBooleanLiteralImpl(right);
+        }
+        if(left.ge) {
+            left = this.visitExpressionImpl(left.ge);
+        }
+        if(right.ge) {
+            right = this.visitExpressionImpl(right.ge);
         }
 
         // Handle the binary operator (op) based on its type
@@ -504,12 +509,11 @@ visitFunctImpl(node: Funct) {
     public visitModelimpl(node: Model): any {
         node.functions.forEach(funct => {
             if(funct.name === 'entry') {
-                console.log('entry');
             this.visitFunctImpl(funct as Funct);
             }
         })
         console.log(this.jsonlist);
-        //return this.jsonlist;
-        return null;
+        return this.jsonlist;
+        //return null;
     }
 }

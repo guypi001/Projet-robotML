@@ -60,8 +60,12 @@ const parseAndValidate = (async () => {
 });
 
 const execute = (async () => {
-    console.info('running current code...');
+    console.info('running 2 current code...');
     // To implement
+    client.getLanguageClient().sendNotification('browser/execute', {
+        content: client.getEditor().getModel().getValue(),
+        uri: client.getEditor().getModel().uri.toString()
+    });
 });
 
 const setupSimulator = (scene) => {
@@ -102,6 +106,7 @@ const setupSimulator = (scene) => {
 window.execute = execute;
 window.typecheck = typecheck;
 window.parseAndValidate = parseAndValidate;
+window.setupSimulator = setupSimulator;
 
 var errorModal = document.getElementById("errorModal");
 var validModal = document.getElementById("validModal");
@@ -122,7 +127,7 @@ window.onclick = function(event) {
     }
   } 
 
-const workerURL = new URL('./robo-ml-server-worker.js', import.meta.url); // WARNING Dependent of your project
+const workerURL = new URL('./robo-language-server-worker.js', import.meta.url); // WARNING Dependent of your project
 console.log(workerURL.href);
 
 const lsWorker = new Worker(workerURL.href, {
@@ -133,4 +138,29 @@ client.setWorker(lsWorker);
 
 // keep a reference to a promise for when the editor is finished starting, we'll use this to setup the canvas on load
 const startingPromise = client.startEditor(document.getElementById("monaco-editor-root"));
+
+
+client.getLanguageClient().onNotification( 'backend/execute', (params)=> {
+    console.log(params);
+    console.log("backend/execute");
+/*
+    switch (command) {
+        case "Forward":
+            console.log("Forward");
+        window.p5robot.move(dist);
+        case "Backward":
+            console.log("Backward");
+        window.p5robot.move(-dist);
+        case "Clock":
+            console.log("Clock");
+        window.p5robot.turn(angle);
+        case "setSpeed":
+            console.log("setSpeed");
+        case "getDistance":
+            console.log("getDistance");
+        default:
+            console.log("Error");
+            
+    }*/
+});
 
