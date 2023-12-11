@@ -60,4 +60,19 @@ En écrivant notre propre grammaire, nous créons une base flexible et évolutiv
 
 En résumé, la création manuelle de la grammaire Langium garantit non seulement un contrôle précis sur le langage, mais aussi une compréhension approfondie et une adaptabilité maximale pour répondre aux besoins actuels et futurs de notre projet. Cela forme le socle solide sur lequel reposera tout le développement ultérieur de notre langage spécifique.
 
+Nous anons ensuite pris le soin de définir **les règles de validation de notre langage.** Ces règles permettent de vérifier la cohérence du code écrit par l'utilisateur. Par exemple, on peut vérifier que les variables utilisées dans une expression sont bien déclarées, ou que les paramètres d'une fonction sont bien utilisés dans son corps.
+
 ## Partie 3 - Modélisation Exécutable
+
+Dans les étapes précédentes, on a d'abord identifié les concepts de base de notre langage, et implémenté une syntaxe textuelle pour définir les instances de ces concepts. À ce stade, nos programmes sont analysable, ce qui signifie que Langium est en mesure de nous fournir un arbre syntaxique abstrait (AST) représentant nos programmes. L'étape suivante consiste à essayer d'exécuter ces instances de modèle : cela peut se faire soit par interprétation, soit par compilation. 
+
+Le design pattern visitor nous a grandement servi pour implémenter l'interpréteur et le compilateur. En effet, ce design pattern permet de diviser la définition du langage en deux parties, la syntaxe (syntaxe abstraite définie par le métamodèle et syntaxe concrète définie par la grammaire) et la sémantique (interpréteur et compilateur), facilitant l'extension/évolution de la sémantique du langage. Chaque méthode mise en œuvre dans un visiteur représente la sémantique d'un concept, en s'appuyant souvent sur la sémantique de son enfant dans l'AST.
+
+### Interprétation :
+
+Dans ce laboratoire, notre interpréteur fonctionnera sur un simulateur web pour le robot écrit en JavaScript. Poir celà nous nous sommes servis du code du simulateur fourni pour cette partie du laboratoire. Dans le fichier interpreter.ts. Nous avons implémenté un visiteur qui parcourt l'AST et exécute les instructions du programme.
+
+Dans le dossier "Interpreter", nous découvrirons le code du simulateur. Les fichiers TypeScript présents dans le répertoire "web/simulator" représentent les éléments de la simulation que nous utilisons dans notre interpréteur. Plus précisément, nous y localiserons la classe "Robot" qui sera manipulée par notre interprète. Quant aux fichiers JavaScript situés dans le répertoire "static/simulator", ils servent à afficher la simulation sur la page web. Ce code JavaScript anticipe la réception de l'état final de la scène simulée.
+
+### Compilation :
+
