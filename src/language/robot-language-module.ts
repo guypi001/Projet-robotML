@@ -51,11 +51,11 @@ export function createRobotLanguageServices(context: DefaultSharedModuleContext)
     shared: LangiumSharedServices,
     RobotLanguage: RobotLanguageServices
 } {
-    const shared = inject(
+    let shared = inject(
         createDefaultSharedModule(context),
         RobotLanguageGeneratedSharedModule
     );
-    const RobotLanguage = inject(
+    let RobotLanguage = inject(
         createDefaultModule({ shared }),
         RobotLanguageGeneratedModule,
         RobotLanguageModule

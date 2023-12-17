@@ -35,12 +35,22 @@ class Robot {
         }
     }
 
-    move(dist){
-        let anglecos = cos(this.angle);
-        let anglesin = sin(this.angle);
-        this.x += anglecos*dist;
-        this.y += anglesin*dist;
+    async move(dist) {
+        const stepSize = 10; 
+        const steps = dist / stepSize; 
+        const anglecos = cos(this.angle);
+        const anglesin = sin(this.angle);
+    
+        for (let i = 0; i < steps; i++) {
+            this.x += anglecos * stepSize;
+            this.y += anglesin * stepSize;
+    
+            if (i < steps - 1) {
+                await new Promise(r => setTimeout(r, 100));
+            }
+        }
     }
+    
 
     side(dist){
         let anglecos = cos(this.angle);

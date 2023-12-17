@@ -57,15 +57,6 @@ editorConfig.theme = 'vs-dark';
 editorConfig.useLanguageClient = true;
 editorConfig.useWebSocket = false;
 
-/*
-languageClient.onNotification('browser/DocumentChange', onDocumentChange);
-function onDocumentChange(response) {
-    // implementation goes here
-    console.log(response);
-    module = JSON.parse(response.module);
-}
-*/
-
 // keep a reference to a promise for when the editor is finished starting, we'll use this to setup the canvas on load
 const startingPromise = client.startEditor(document.getElementById("monaco-editor-root"));
 let module = null;
@@ -100,14 +91,11 @@ const typecheck = (async () => {
 const parseAndValidate = (async () => {
     console.info('validating current code...');
     // To implement
-    console.log(module);
-    let onDocumentChange = (response) => {
-        console.log(response);
-        module = JSON.parse(response.module);
-    }
-    languageClient.onNotification( 'browser/DocumentChange', onDocumentChange);
-
-    validModal.style.display = "block";
+    
+    client.getLanguageClient().sendNotification('browser/parseAndValidate', {
+        content: client.getEditor().getModel().getValue(),
+        uri: client.getEditor().getModel().uri.toString()
+    });
 });
 
 const execute = (async () => {
@@ -118,7 +106,6 @@ const execute = (async () => {
         content: client.getEditor().getModel().getValue(),
         uri: client.getEditor().getModel().uri.toString()
     });
-
 });
 
 const setupSimulator = (scene) => {
@@ -126,6 +113,7 @@ const setupSimulator = (scene) => {
     let factor = 1000 / wideSide;
 
     window.scene = scene;
+    console.log('scene');
 
     scene.entities.forEach((entity) => {
         if (entity.type === "Wall") {
@@ -156,10 +144,11 @@ const setupSimulator = (scene) => {
     );
 }
 
+//setupSimulator(window.scene);
 window.execute = execute;
 window.typecheck = typecheck;
 window.parseAndValidate = parseAndValidate;
-window.setupSimulator = setupSimulator;
+
 
 var errorModal = document.getElementById("errorModal");
 var validModal = document.getElementById("validModal");
@@ -185,26 +174,47 @@ startingPromise.then(() => {
     setupSimulator();
 })*/
 
-client.getLanguageClient().onNotification( 'backend/execute', (params)=> {
+client.getLanguageClient().onNotification('backend/execute', async (params) => {
     console.log(params);
-    console.log("backend/execute");
-/*
-    switch (command) {
-        case "Forward":
-            console.log("Forward");
-        window.p5robot.move(dist);
-        case "Backward":
-            console.log("Backward");
-        window.p5robot.move(-dist);
-        case "Clock":
-            console.log("Clock");
-        window.p5robot.turn(angle);
-        case "setSpeed":
-            console.log("setSpeed");
-        case "getDistance":
-            console.log("getDistance");
-        default:
-            console.log("Error");
-            
-    }*/
+
+    for (const action of params) {
+        console.log(action.function);
+        switch (action.function) {
+            case 'Forward':
+                await window.p5robot.move(action.distance);
+                break;
+            case 'Clock':
+                window.p5robot.turn(Math.PI * action.distance / 180);
+                break;
+            case 'getTimestamp':
+                window.p5robot.side(action.value);
+                break;
+            case 'setSpeed':
+                window.p5robot.speed = action.value;
+                break;
+            case 'getDistance':
+                window.p5robot.speed = action.value;
+                break;
+            default:
+                console.log('Unknown action type: ' + action.type);
+        }
+        
+        await new Promise(r => setTimeout(r, 500));
+        draw();
+    }
+});
+
+client.getLanguageClient().onNotification('backend/parseAndValidate', async (params) => {
+    console.log(params);
+    console.log('parseAndValidate');
+    module = params;
+    if (module.lexerErrors.length === 0 && 
+        module.parserErrors.length === 0
+    ) {
+        const modal = document.getElementById("validModal");
+        modal.style.display = "block";
+    } else {
+        const modal = document.getElementById("errorModal");
+        modal.style.display = "block";
+    }
 });

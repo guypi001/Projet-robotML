@@ -20,19 +20,20 @@ visitFunctImpl(node: Funct) {
 
             if (isAssignment(stmt)) {
                 if (stmt.variable.ref) {
-                    this.visitAssignmentImpl(stmt);
+                    console.log(`Assigment ${stmt.variable.ref.name} = ${this.visitAssignmentImpl(stmt)}`);
                 }
             }
             if (isFunctionCallStatement(stmt)) {
                 this.visitFunctionCallStatementImpl(stmt);
             }
             if (isVariableDeclaration(stmt) && isExpression(stmt.initialValue)) {
-                this.visitVariableDeclarationImpl(stmt);
+                console.log(`Variable ${stmt.name} = ${this.visitExpressionImpl(stmt.initialValue)}`);
             }
             if (isIfStatement(stmt)) {
                 this.visitIfStatementImpl(stmt);
             }
             if(isWhileLoop(stmt)) {
+                console.log('while');
                 this.visitWhileLoopImpl(stmt);
             }
             if(isInternalFunctionCallStatement(stmt) && isInternalFunctionCall(stmt)) {
@@ -170,6 +171,7 @@ visitFunctImpl(node: Funct) {
     visitDeplacementImpl(node: Deplacement) {
         // rajouter un json dans la liste jsonlist
         this.jsonlist.push({function: node.function, distance: this.visitExpressionImpl(node.distance)});
+        console.log(`Deplacement ${node.function}(${this.visitExpressionImpl(node.distance)})`);
     }
     visitIfStatementImpl(node: IfStatement) {
         if(isExpression(node.condition)){
@@ -253,11 +255,10 @@ visitFunctImpl(node: Funct) {
     visitWhileLoopImpl(node: WhileLoop) {
         if(isExpression(node.condition)){
         while (this.visitExpressionImpl(node.condition)) {
-            // Visit the statements in the loop body
             for (const stmt of node.body) {
                 if (isAssignment(stmt)) {
                     if (stmt.variable.ref) {
-                         this.visitAssignmentImpl(stmt);
+                        console.log(`Assigment ${stmt.variable.ref.name} = ${this.visitAssignmentImpl(stmt)}`);
                     }
                 }
                 if (isFunctionCallStatement(stmt)) {
@@ -267,16 +268,16 @@ visitFunctImpl(node: Funct) {
                     if (isVariableDeclaration(stmt)) {
                         if (isExpression(stmt.initialValue)) {
                             //this.visitExpressionImpl(stmt.initialValue);
-                            this.visitExpressionImpl(stmt.initialValue);
+                            console.log(`Variable ${stmt.name} = ${this.visitExpressionImpl(stmt.initialValue)}`);
                         }
                         if (isFunctionCallStatement(stmt.initialValue)) {
-                            this.visitFunctionCallStatementImpl(stmt.initialValue);
+                            console.log(`Variable ${stmt.name} = ${this.visitFunctionCallStatementImpl(stmt.initialValue)}`);
                         }
                         if (isInternalFunctionCallStatement(stmt.initialValue) && isInternalFunctionCall(stmt.initialValue) && isGetDistance(stmt.initialValue)) {
-                            this.visitGetDistanceImpl(stmt.initialValue);
+                            console.log(`Variable ${stmt.name} = ${this.visitGetDistanceImpl(stmt.initialValue)}`);
                         }
                         if (isInternalFunctionCallStatement(stmt.initialValue) && isInternalFunctionCall(stmt.initialValue) && isGetTime(stmt.initialValue)) {
-                            this.visitGetTimeImpl(stmt.initialValue);
+                            console.log(`Variable ${stmt.name} = ${this.visitGetTimeImpl(stmt.initialValue)}`);
                         }
                     }
                 }
@@ -304,6 +305,7 @@ visitFunctImpl(node: Funct) {
                     this.visitRotationImpl(stmt);
                 }
                 if(isInternalFunctionCallStatement(stmt) && isInternalFunctionCall(stmt) && isSetting(stmt)) {
+                    console.log('setting');
                     this.visitSettingImpl(stmt);
                 }
             }
@@ -318,7 +320,7 @@ visitFunctImpl(node: Funct) {
     visitRotationImpl(node: Rotation) {
         // rajouter un json dans la liste jsonlist
         this.jsonlist.push({function: node.function, distance: this.visitExpressionImpl(node.angle)});
-        this.visitExpressionImpl(node.angle);
+        console.log(`Rotation ${node.function}(${this.visitExpressionImpl(node.angle)})`);
     }
     visitExpressionImpl(node: Expression): any {
         // Handle the `ge` expression (if present)
@@ -368,6 +370,7 @@ visitFunctImpl(node: Funct) {
     }
     visitSettingImpl(node: Setting) {
         // rajouter un json dans la liste jsonlist
+        
         this.jsonlist.push({function: node.function, distance: this.visitExpressionImpl(node.vitesse)});
         // Handle the unit property
         if (node.unit) {
@@ -509,11 +512,11 @@ visitFunctImpl(node: Funct) {
     public visitModelimpl(node: Model): any {
         node.functions.forEach(funct => {
             if(funct.name === 'entry') {
+                console.log('entry');
             this.visitFunctImpl(funct as Funct);
             }
         })
         console.log(this.jsonlist);
         return this.jsonlist;
-        //return null;
     }
 }
