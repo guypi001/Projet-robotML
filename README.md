@@ -70,9 +70,33 @@ Le design pattern visitor nous a grandement servi pour implémenter l'interprét
 
 ### Interprétation :
 
-Dans ce laboratoire, notre interpréteur fonctionnera sur un simulateur web pour le robot écrit en JavaScript. Poir celà nous nous sommes servis du code du simulateur fourni pour cette partie du laboratoire. Dans le fichier interpreter.ts. Nous avons implémenté un visiteur qui parcourt l'AST et exécute les instructions du programme.
+Dans ce laboratoire, notre interpréteur fonctionnera sur un simulateur web pour le robot écrit en JavaScript. Pour celà nous nous sommes servis du code du simulateur fourni pour cette partie du laboratoire. Dans le fichier interpreter.ts. Nous avons implémenté un visiteur qui parcourt l'AST et exécute les instructions du programme.
 
 Dans le dossier "Interpreter", nous découvrirons le code du simulateur. Les fichiers TypeScript présents dans le répertoire "web/simulator" représentent les éléments de la simulation que nous utilisons dans notre interpréteur. Plus précisément, nous y localiserons la classe "Robot" qui sera manipulée par notre interprète. Quant aux fichiers JavaScript situés dans le répertoire "static/simulator", ils servent à afficher la simulation sur la page web. Ce code JavaScript anticipe la réception de l'état final de la scène simulée.
 
+### Exécution du simulateur :
+Nous devons à ce stade être en mésure de simuler le comportement de notre robot. Pour celà, nous allons utiliser le simulateur web fourni. Pour lancer le simulateur, il suffit à l'utilisateur de cliquer sur le boutton "Execute Simulation" de la page web.
+
+Pour ensuite se rendre sur la page web de notre simulateur à l'adresse suivante : http://localhost:3000/
+
+La technique utilisée pour communiquer entre le simulateur et l'interpréteur est la suivante :
+    
+    - L'interpréteur envoie une requête HTTP POST au simulateur pour lui demander d'exécuter une commande(Une fois que l'utilisateur  clique sur le boutton execute-simulation).
+    
+    - Le simulateur exécute la commande et renvoie l'état final de la scène simulée à l'interpréteur.
+    
+    - L'interpréteur reçoit l'état final de la scène simulée et le stocke dans une variable.
+    
+    - L'interpréteur continue à exécuter le reste du programme.
+    
+    - Lorsque l'interpréteur a terminé l'exécution du programme, il affiche l'état final de la scène simulée.
+    
+    - L'interpréteur affiche l'état final de la scène simulée.
+
+[simulation.webm](https://github.com/guypi001/RobotML/assets/107374001/8e88647c-ffd6-4355-b544-d14d28d7962f)
+
+
 ### Compilation :
+
+La dernière section de ce TP sera consacrer à l'élaboration du compilateur. Nous avons choisi de générer du code Arduino pour exécuter le comportement sur le robot réel. Pour celà nous avons implémenté un visiteur qui parcourt l'AST et génère le code Arduino correspondant.
 
