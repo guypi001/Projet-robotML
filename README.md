@@ -4,7 +4,7 @@ Bienvenue dans ce repo GitHub RoboML. Ce projet est issu de sessions de TP visan
 
 # Sommaire
 
-- [Partie 1 - Modélisation du domaine : Définition du métamodèle du langage avec Ecore](#1---Partie-1-Modélisation-du-domaine-:-Définition-du-métamodèle-du-langage-avec-Ecore)
+[Partie 1 - Modélisation du domaine : Définition du métamodèle du langage avec Ecore](#1---Partie-1-Modélisation-du-domaine-:-Définition-du-métamodèle-du-langage-avec-Ecore)
 
 ## Partie 1 - Modélisation du domaine : Définition du métamodèle du langage avec Ecore
 
