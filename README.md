@@ -2,12 +2,6 @@
 
 Bienvenue dans ce repo GitHub RoboML. Ce projet est issu de sessions de TP visant à créer un langage dédié (DSL) permettant de spécifier le comportement d’un petit robot. Il se distingue par la conception et l'implémentation complètes de l'écosystème RoboML, couvrant la modélisation du domaine, l'éditeur de texte avec ses services, un interpréteur basé sur un simulateur web, et enfin, un compilateur générant du code Arduino pour exécuter le comportement sur le robot réel.
 
-# Sommaire
-
-[Partie 1 - Modélisation du domaine : Définition du métamodèle du langage avec Ecore](#1---Partie-1-Modélisation-du-domaine)
-
-[Partie 2 - Modélisation textuelle: Définition de la grammaire Langium et de l'éditeur de notre language](#2---Partie-2)
-
 ## Partie 1 - Modélisation du domaine : Définition du métamodèle du langage avec Ecore
 
 Dans cette première partie nous nous interesserons aux concepts indispensables à la création de notre métamodèle ainsi que les relations que ces dernièrs entretiennent entre eux.
