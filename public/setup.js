@@ -190,7 +190,7 @@ client.getLanguageClient().onNotification('backend/execute', async (params) => {
                 window.p5robot.side(action.value);
                 break;
             case 'setSpeed':
-                window.p5robot.speed = action.value;
+                window.p5robot.vitesse = action.distance;
                 break;
             case 'getDistance':
                 window.p5robot.speed = action.value;
@@ -203,18 +203,23 @@ client.getLanguageClient().onNotification('backend/execute', async (params) => {
         draw();
     }
 });
-
+let myVariable = "Errors :";
+let contentContainer = document.getElementById("contentContainer");
 client.getLanguageClient().onNotification('backend/parseAndValidate', async (params) => {
     console.log(params);
     console.log('parseAndValidate');
-    module = params;
-    if (module.lexerErrors.length === 0 && 
-        module.parserErrors.length === 0
-    ) {
-        const modal = document.getElementById("validModal");
-        modal.style.display = "block";
-    } else {
+
+    if(params.length > 0){
+        for (const error of params) {
+            myVariable = myVariable + "<br>" + `line ${error.range.start.line + 1}: ${error.message} [${error.range.start.line + 1}:${error.range.start.character + 1}]`;
+        }
+        contentContainer.innerHTML = myVariable;
         const modal = document.getElementById("errorModal");
         modal.style.display = "block";
+    } else {
+        contentContainer.innerHTML = "Aucune erreur";
+        const modal = document.getElementById("validModal");
+        modal.style.display = "block";
     }
+
 });

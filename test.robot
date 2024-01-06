@@ -1,5 +1,5 @@
 let void entry () {
-    var number count = 0
+    var number coun = 0
     loop count < 5
     {	
         setSpeed(500 * (count + 1))

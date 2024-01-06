@@ -1,5 +1,5 @@
 class Robot {
-    constructor(factor, _x = 0, _y = 0, _width = 50, _height = 75, _angle = 0) {
+    constructor(factor, _x = 0, _y = 0, _width = 50, _height = 75, _angle = 0, _vitesse = 10) {
         this.factor = factor;
         // x and y represent the center of the robot
         this.x = _x;
@@ -7,6 +7,7 @@ class Robot {
         this.angle = _angle;
         this.width = _width;
         this.height = _height;
+        this.vitesse = _vitesse;
     }
   
     show() {
@@ -36,7 +37,7 @@ class Robot {
     }
 
     async move(dist) {
-        const stepSize = 10; 
+        const stepSize = 1; 
         const steps = dist / stepSize; 
         const anglecos = cos(this.angle);
         const anglesin = sin(this.angle);
@@ -46,7 +47,7 @@ class Robot {
             this.y += anglesin * stepSize;
     
             if (i < steps - 1) {
-                await new Promise(r => setTimeout(r, 100));
+                await new Promise(r => setTimeout(r, (1/this.vitesse)*100));
             }
         }
     }
