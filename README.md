@@ -106,18 +106,18 @@ Nous avons ensuite pris le soin de définir **les règles de validation de notre
 ## Partie 3 - Modélisation Exécutable
 
 Dans les étapes précédentes, on a d'abord identifié les concepts de base de notre langage, et implémenté une syntaxe textuelle pour définir les instances de ces concepts. 
-À ce stade, nos programmes sont analysable, ce qui signifie que Langium est en mesure de nous fournir un arbre syntaxique abstrait (AST) représentant nos programmes. 
-Dans l'étape suivante nous allons essayer d'exécuter ces instances de modèle.
+À ce stade, nos programmes sont analysables, ce qui signifie que Langium est en mesure de nous fournir un arbre syntaxique abstrait (AST) représentant nos programmes. 
+Dans l'étape suivante nous allons essayer d'exécuter ces instances de modèle au travers d'un **interpreteur** et d'un **compilateur**
 
-Le design pattern visitor nous a grandement servi pour implémenter l'interpréteur et le compilateur. En effet, ce design pattern permet de diviser la définition du langage en deux parties, la syntaxe (syntaxe abstraite définie par le métamodèle et syntaxe concrète définie par la grammaire) et la sémantique (interpréteur et compilateur), facilitant l'extension/évolution de la sémantique du langage. Chaque méthode mise en œuvre dans un visiteur représente la sémantique d'un concept, en s'appuyant souvent sur la sémantique de son enfant dans l'AST.
+Le design pattern visiteur nous a grandement servi pour implémenter l'interpréteur et le compilateur. En effet, ce design pattern permet de diviser la définition du langage en deux parties, la syntaxe (syntaxe abstraite définie par le métamodèle et syntaxe concrète définie par la grammaire) et la sémantique (interpréteur et compilateur), facilitant l'extension/évolution de la sémantique du langage. Chaque méthode mise en œuvre dans un visiteur représente la sémantique d'un concept, en s’appuyant souvent sur la sémantique de son enfant dans l’AST.
 
 ### Interprétation :
 
-Dans cette partie, nous nous interesserons à l'implémentation de notre interpreteur.Il fonctionnera sur un simulateur web pour le robot écrit en JavaScript. Pour celà nous nous sommes servis du code du simulateur fourni pour cette partie du laboratoire. Dans le fichier interpreter.ts. Nous avons implémenté un visiteur qui parcourt l'AST et exécute les instructions du programme.
+Dans cette partie, nous nous interesserons à l'implémentation de notre interpreteur. Il fonctionnera sur un simulateur web pour le robot écrit en JavaScript. Pour celà nous nous sommes servis de l'ébauche du code du simulateur fourni pour cette partie du TP. Nous avons implémenté un visiteur qui parcourt l'AST et exécute les instructions du programme.
 
-Dans le dossier "Interpreter", nous avons découvert le code du simulateur. Les fichiers TypeScript présents dans le répertoire "web/simulator" représentent les éléments de la simulation que nous utilisons dans notre interpréteur. Plus précisément, nous y localiserons la classe "Robot" qui sera manipulée par notre interprète. Quant aux fichiers JavaScript situés dans le répertoire "static/simulator", ils servent à afficher la simulation sur la page web. Ce code JavaScript anticipe la réception de l'état final de la scène simulée.
+Les fichiers TypeScript présents dans le répertoire "web/simulator" représentent les éléments de la simulation que nous utilisons dans notre interpréteur. Plus précisément, nous y localiserons la classe "Robot" qui sera manipulée par notre interprète. Quant aux fichiers JavaScript situés dans le répertoire "static/simulator", ils servent à afficher la simulation sur la page web. Ce code JavaScript anticipe la réception de l'état final de la scène simulée.
 
-Notre simulateur comporte un certains nombre d'actions dont:
+Notre simulateur comporte un certains nombre d'actions dont les principales sont **Parse and Validate** et **Execute simulation**
 
 
 ### Exécution du simulateur :
@@ -127,18 +127,6 @@ Pour ensuite se rendre sur la page web de notre simulateur à l'adresse suivante
 
 La technique utilisée pour communiquer entre le simulateur et l'interpréteur est la suivante :
     
-    - L'interpréteur envoie une requête HTTP POST au simulateur pour lui demander d'exécuter une commande(Une fois que l'utilisateur  clique sur le boutton execute-simulation).
-    
-    - Le simulateur exécute la commande et renvoie l'état final de la scène simulée à l'interpréteur.
-    
-    - L'interpréteur reçoit l'état final de la scène simulée et le stocke dans une variable.
-    
-    - L'interpréteur continue à exécuter le reste du programme.
-    
-    - Lorsque l'interpréteur a terminé l'exécution du programme, il affiche l'état final de la scène simulée.
-    
-    - L'interpréteur affiche l'état final de la scène simulée.
-
 [simulation.webm](https://github.com/guypi001/RobotML/assets/107374001/8e88647c-ffd6-4355-b544-d14d28d7962f)
 
 
@@ -150,5 +138,7 @@ La dernière section de ce TP sera consacrer à l'élaboration du compilateur.No
 
 ### Notes Particulières
 
-Nous avons mis l'accent sur la réalisation de l'interpreteur ainsi que le simulateur web qui va avec.
+![dialog-warning-panel](https://github.com/guypi001/Projet-robotML/assets/107374001/6c5f2bfe-ceb1-4caa-9567-a7b960731c38)
+
+Nous avons mis l'accent sur la réalisation de l'interpreteur ainsi que le simulateur web qui l'accompagne. Pour ce qui est du compilateur, nous
 
