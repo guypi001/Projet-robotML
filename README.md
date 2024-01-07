@@ -115,24 +115,19 @@ Le design pattern visiteur nous a grandement servi pour implémenter l'interpré
 
 Dans cette partie, nous nous interesserons à l'implémentation de notre interpreteur. Il fonctionnera sur un simulateur web pour le robot écrit en JavaScript. Pour celà nous nous sommes servis de l'ébauche du code du simulateur fourni pour cette partie du TP. Nous avons implémenté un visiteur qui parcourt l'AST et exécute les instructions du programme.
 
+En résumé, le code de notre fichier interpreter.ts représente un visiteur pour un AST spécifique dans notre langage RobotML. Il parcourt l'AST et extrait des informations spécifiques, stockant ces informations dans une liste JSON pour un traitement ultérieur. 
+
 Les fichiers TypeScript présents dans le répertoire "web/simulator" représentent les éléments de la simulation que nous utilisons dans notre interpréteur. Plus précisément, nous y localiserons la classe "Robot" qui sera manipulée par notre interprète. Quant aux fichiers JavaScript situés dans le répertoire "static/simulator", ils servent à afficher la simulation sur la page web. Ce code JavaScript anticipe la réception de l'état final de la scène simulée.
 
 Notre simulateur comporte un certains nombre d'actions dont les principales sont **Parse and Validate** et **Execute simulation**
 
+Voici une vidéo simulant l'action de notre interpreteur.
 
-### Exécution du simulateur :
-Nous devons à ce stade être en mésure de simuler le comportement de notre robot. Pour celà, nous avons implémenter le simulateur web. Pour lancer le simulateur, il suffit à l'utilisateur de cliquer sur le boutton "Execute Simulation" de la page web.
-
-Pour ensuite se rendre sur la page web de notre simulateur à l'adresse suivante : http://localhost:3000/
-
-La technique utilisée pour communiquer entre le simulateur et l'interpréteur est la suivante :
-    
 [simulation.webm](https://github.com/guypi001/RobotML/assets/107374001/8e88647c-ffd6-4355-b544-d14d28d7962f)
 
-
 ### Compilation :
-
-La dernière section de ce TP sera consacrer à l'élaboration du compilateur.Nous avons implémenté un visiteur qui parcourt l'AST et génère le code Arduino correspondant.
+La dernière section de ce TP sera consacrer à l'élaboration du compilateur.Dans la même logique que celle de l'interpreteur nous avons entrepris d'implémenter un visiteur qui parcourt l'AST et génère le code Arduino correspondant.
+Chaque étape implique des règles spécifiques au DSL et aux caractéristiques de notre langage cible. L'objectif principal d'un compilateur est de traduire le code source RobotML en un format exécutable (Arduino).
 
 ![image](https://github.com/guypi001/Projet-robotML/assets/107374001/d9f1375b-b170-4b49-b0d7-06c2b7430568)
 
@@ -140,5 +135,5 @@ La dernière section de ce TP sera consacrer à l'élaboration du compilateur.No
 
 ![dialog-warning-panel](https://github.com/guypi001/Projet-robotML/assets/107374001/6c5f2bfe-ceb1-4caa-9567-a7b960731c38)
 
-Nous avons mis l'accent sur la réalisation de l'interpreteur ainsi que le simulateur web qui l'accompagne. Pour ce qui est du compilateur, nous
+Nous avons mis l'accent sur la réalisation de l'interpreteur ainsi que le simulateur web qui l'accompagne. Pour ce qui est du compilateur, nous avons entrepris son implémentation mais il n'est pas encore opérationnel.
 
