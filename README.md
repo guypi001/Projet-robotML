@@ -51,7 +51,10 @@ L'image fournit (loin d'être visible) dénote du grand nombre de concept que no
 Dans cette seconde phase de notre projet, nous abordons la modélisation textuelle à travers la création et la définition de la grammaire Langium, ainsi que le développement d'un éditeur dédié à notre langage. Cette étape est essentielle car elle établit les fondations linguistiques et les outils nécessaires pour la manipulation efficace de notre langage spécifique.
 
 **Présentation de la grammaire Langium:**
+
 Comme expliqué précédemment, nous avons opté pour la création de notre propre grammaire Langium.
+
+Voilà un apperçu de cette dernière:
 
 ```
 grammar RobotLanguage
@@ -74,141 +77,13 @@ VariableDeclaration:
 Statement:
     VariableDeclaration | Assignment | ControlStatement | FunctionCallStatement;
 
-// Règle de production pour une instruction d'affectation
-Assignment:
-    variable=[VariableDeclaration] "=" (expression=(Expression | FunctionCallStatement | InternalFunctionCallStatement)) ("in" unit2=("mm"|"cm"))?;
-    //variableDeclaration=[VariableDeclaration] "=" value=Expression;
 
-// Règle de production pour une instruction de contrôle
-ControlStatement:
-    IfStatement | LoopStatement | InternalFunctionCallStatement;
-
-FunctionCallStatement:
-// Nom de la fonction à appeler
-    function=[Funct]
-// Liste des paramètres
-    "(" (parameters+=FunctionParameter (',' parameters+=FunctionParameter)*)? ")";
-
-// Règle de production pour une instruction if
-IfStatement:
-    "if" "(" condition=(Expression | FunctionCallStatement) ")" '{' ifbody+=Statement* '}' ("else" '{' elsebody+=Statement* '}')?;
-
-// Règle de production pour une instruction de boucle
-LoopStatement:
-    WhileLoop | ForLoop;
-
-// Règle de production pour une boucle while
-WhileLoop:
-    "loop" condition=(Expression | FunctionCallStatement) '{' body+=Statement* '}';
-
-// Règle de production pour une boucle for
-ForLoop:
-    "for" "(" (initStatements+=Statement)? ";" (condition=(Expression | FunctionCallStatement))? ";" (updateStatements+=Statement)? ")" '{' body+=Statement* '}';
-
-// Règle de production pour une instruction d'appel de fonction interne
-InternalFunctionCallStatement:
-    InternalFunctionCall ;
-
-// Règle de production pour un appel de fonction interne
-InternalFunctionCall:
-    Deplacement | Rotation | Setting | GetTime | GetDistance;
-
-Deplacement:
-    function=("Forward"|"Backward") distance=Expression (unit=("mm"|"cm") | "in" unit2=("mm"|"cm"))?;
-
-Rotation:
-    function="Clock" angle=Expression;
-
-Setting:
-    function="setSpeed" "(" vitesse=Expression (unit=("mm"|"cm"))? ")";
-
-GetTime:
-    function="getTimestamp" "(" ")";
-
-GetDistance:
-    function="getDistance" "(" ")" ("in" unit2=("mm"|"cm"))?;
-
-// Règle de production pour un paramètre de fonction
-FunctionParameter:
-    expression = (VariableDeclaration | Expression);
-
-Expression:
-    AdditionExpression | OrExpression;
-
-AdditionExpression infers Expression:
-    MultiplicationExpression ({infer BinExpr.e1=current} op=('+'|'-') e2=MultiplicationExpression)*;
-
-MultiplicationExpression infers Expression:
-    PrimaryExpression ({infer BinExpr.e1=current} op=('*'|'/') e2=PrimaryExpression)*;
-PrimaryExpression infers Expression:
-    Literal | VariableReference | GroupedExpression | NegatedExpression;
-GroupedExpression infers Expression:
-    '(' ge=Expression ')';
-NegatedExpression infers Expression:
-    '-' ne=Expression;
-Literal infers Expression:
-    NumberLiteral | BooleanLiteral ;
-
-OrExpression infers Expression:
-    AndExpression ({infer BinExpr.e1=current} op='||' e2=AndExpression)*;
-AndExpression infers Expression:
-    EqualityExpression ({infer BinExpr.e1=current} op='&&' e2=EqualityExpression)*;
-EqualityExpression infers Expression:
-    ComparisonExpression ({infer BinExpr.e1=current} op=('=='|'!=') e2=ComparisonExpression)*;
-ComparisonExpression infers Expression:
-    AdditionExpression ({infer BinExpr.e1=current} op=('<'|'<='|'>'|'>=') e2=AdditionExpression)*;
-
-
-//MesureExpression:
-    //value=INT unit=("cm"|"mm");
-
-
-// Règle de production pour un littéral numérique
-NumberLiteral:
-    value=NUMBER;
-
-BooleanLiteral:
-    value=BOOL;
-
-// Règle de production pour une référence de variable
-VariableReference:
-    variable=[VariableDeclaration];
-
-// Règle de production pour un type de variable
-VariableType:
-    BasicType | UserDefinedType;
-
-// Règle de production pour un type de base
-BasicType: 
-    type=("void"|"number"|"bool"|"string");
-
-// Règle de production pour un type défini par l'utilisateur
-UserDefinedType:
-    name=ID;
-
-// Règle de production pour un littéral booléen
-terminal BOOL returns boolean:
-    "true" | "false";
-
-hidden terminal WS:
-     /\s+/;
-terminal ID:
-     /[_a-zA-Z][\w_]*/;
-terminal NUMBER returns number:
-     /(?:(?:-?[0-9]+)?\.[0-9]+)|-?[0-9]+/;
-//terminal STRING:
-  //   /"(\\.|[^"\\])*"|'(\\.|[^'\\])*'/;
-
-hidden terminal ML_COMMENT:
-     /\/\*[\s\S]*?\*\//;
-hidden terminal SL_COMMENT:
-     /\/\/[^\n\r]*/;
 ````
 En résumé, la création manuelle de la grammaire Langium garantit non seulement un contrôle précis sur le langage, mais aussi une compréhension approfondie et une adaptabilité maximale pour répondre aux besoins actuels et futurs de notre projet. Cela forme le socle solide sur lequel reposera tout le développement ultérieur de notre langage spécifique.
 
 Nous avons ensuite pris le soin de définir **les règles de validation de notre langage.** Ces règles permettent de vérifier la cohérence du code écrit par l'utilisateur. Par exemple, on peut vérifier que les variables utilisées dans une expression sont bien déclarées, ou que les paramètres d'une fonction sont bien utilisés dans son corps.
 
-``
+````
    checkUniqueDefs(model: Model, accept: ValidationAcceptor): void {
         const definedFunctions = new Set<string>();
         model.functions.forEach(f => {
@@ -226,13 +101,13 @@ Nous avons ensuite pris le soin de définir **les règles de validation de notre
             accept('warning', 'Model don\'t have entry() function.', {node: model, property: 'functions'});
         }
     }
-``
+````
 
 ## Partie 3 - Modélisation Exécutable
 
-Dans les étapes précédentes, on a d'abord identifié les concepts de base de notre langage, et implémenté une syntaxe textuelle pour définir les instances de ces concepts. À ce stade, nos programmes sont analysable, ce qui signifie que Langium est en mesure de nous fournir un arbre syntaxique abstrait (AST) représentant nos programmes. 
-L'étape suivante consiste à essayer d'exécuter ces instances de modèle : cela peut se faire soit par interprétation, soit par compilation. 
-
+Dans les étapes précédentes, on a d'abord identifié les concepts de base de notre langage, et implémenté une syntaxe textuelle pour définir les instances de ces concepts. 
+À ce stade, nos programmes sont analysable, ce qui signifie que Langium est en mesure de nous fournir un arbre syntaxique abstrait (AST) représentant nos programmes. 
+Dans l'étape suivante nous allons essayer d'exécuter ces instances de modèle.
 
 Le design pattern visitor nous a grandement servi pour implémenter l'interpréteur et le compilateur. En effet, ce design pattern permet de diviser la définition du langage en deux parties, la syntaxe (syntaxe abstraite définie par le métamodèle et syntaxe concrète définie par la grammaire) et la sémantique (interpréteur et compilateur), facilitant l'extension/évolution de la sémantique du langage. Chaque méthode mise en œuvre dans un visiteur représente la sémantique d'un concept, en s'appuyant souvent sur la sémantique de son enfant dans l'AST.
 
