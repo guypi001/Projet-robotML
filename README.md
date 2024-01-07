@@ -4,7 +4,7 @@ Bienvenue dans ce repo GitHub RoboML. Ce projet est issu de sessions de TP visan
 
 ## Partie 1 - Modélisation du domaine : Définition du métamodèle du langage avec Ecore
 
-Dans cette première partie nous nous interesserons aux concepts indispensables à la création de notre métamodèle ainsi que les relations que ces dernièrs entretiennent entre eux.
+Dans cette première partie nous nous interesserons aux concepts indispensables à la création de notre métamodèle ainsi que les relations que ces derniers entretiennent entre eux.
 
 ### Description des concepts 
 Nous avons pris le soin de nommer les concepts de manière à ce qu'ils soient compréhensible au maximum. Cependant, nous allons décrire les concepts fondamentaux qui composent notre métamodel.
@@ -38,10 +38,13 @@ Nous avons pris le soin de nommer les concepts de manière à ce qu'ils soient c
 **Unit :** Utilisé pour définir des unités de mesure dans le contexte du robot.
     
 ### Présentation du Modèle Ecore
+L'image fournit (loin d'être visible) dénote du grand nombre de concept que nous avons été contraint de définir pour notre modèle Ecore.
 
 **NB:** La modélisation de notre modèle Ecore nous à permis de connaitre les concepts qui entrent en jeu ainsi que les rélations que ces derniers entretiennent entre eux. Cependant, pour la suite, nous avons optés d'écrire nous même notre grammaire plutôt que de générer une grammaire Xtext.
 
 ## Partie 2 - Modélisation textuelle: Définition de la grammaire Langium et de l'éditeur de notre language
+
+![WhatsApp Image 2023-11-21 at 20 32 14](https://github.com/guypi001/Projet-robotML/assets/107374001/f121da50-3bd4-4e28-954b-d77f6bfa6ff3)
 
 Dans cette seconde phase de notre projet, nous abordons la modélisation textuelle à travers la création et la définition de la grammaire Langium, ainsi que le développement d'un éditeur dédié à notre langage. Cette étape est essentielle car elle établit les fondations linguistiques et les outils nécessaires pour la manipulation efficace de notre langage spécifique.
 
@@ -98,5 +101,10 @@ La technique utilisée pour communiquer entre le simulateur et l'interpréteur e
 
 ### Compilation :
 
-La dernière section de ce TP sera consacrer à l'élaboration du compilateur. Nous avons choisi de générer du code Arduino pour exécuter le comportement sur le robot réel. Pour celà nous avons implémenté un visiteur qui parcourt l'AST et génère le code Arduino correspondant.
+La dernière section de ce TP sera consacrer à l'élaboration du compilateur.Nous avons implémenté un visiteur qui parcourt l'AST et génère le code Arduino correspondant.
+
+
+### Notes Particulières
+
+
 
